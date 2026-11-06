@@ -1,7 +1,7 @@
 # Technical Design — 工地猜拳大賽
 
-> 文件版本：TD v0.4（Proposed / 待開發驗證）
-> 日期：2026-11-05
+> 文件版本：TD v0.7（同步 Spec v1.5 的三次教學作答上限；Proposed / 待開發驗證）
+> 日期：2026-11-06
 > 產品依據：[PRD](../PRD.md)（願景、範圍、優先級）
 > 功能依據：[Spec](../spec.md)（FR／US／AC／NFR 與驗收 SSOT）
 > 對應產品版本：MVP v1.0 — Browser-First / Touch-First
@@ -11,7 +11,7 @@
 
 ### 1.1 交付目標
 
-- 以網址進入、可在 iPad / iPhone Safari 觸控遊玩的網頁遊戲，同時相容桌面及 Android 現代瀏覽器（PRD US-12）。
+- 以網址進入、可在 iPad / iPhone Safari 觸控遊玩的網頁遊戲，同時相容桌面及 Android 現代瀏覽器（Spec US-12）。
 - 支援教學（Learn）、單人電腦對戰（Computer）與親子同螢幕（Together）（US-07～US-09）。
 - 一回合一個結果；相同的規則計算，能由不同的畫面、動畫與音訊呈現（US-02、US-03、US-06）。
 - 採用本機進度，無登入要求；離線功能、攝影機辨識、原生 App 與雲端同步均非 MVP。攝影機及真實手勢等僅為待使用者回饋驗證的可能方向（PRD §5.3 IDEA-05），未有預定後續版本。
@@ -66,7 +66,7 @@ UI (Screens / Cards / Controls)
 - **ContentDefinitions**：三位主角、圖像、舞台、文案及結果視覺所需的簡單內容對照；不包含可以修改規則的參數。
 - **AnimationPlayer**：接受已算好的回合結果與對應動畫 ID，只負責視覺；支援結束通知、跳過、重播與中斷。
 - **Audio / I18n**：接受語音／字串 key，處理雙語順序、音效隊列、靜音與重播，不決定勝負。
-- **ProgressStore**：保存已解鎖收藏、有限的教學進度與設定；處理版本、讀取錯誤和儲存失敗。
+- **ProgressStore**：保存每組勝負規則的 0～3 次合格無提示首答正確計數、已解鎖收藏 ID 與三種語音偏好；處理版本、讀取錯誤和儲存失敗。
 - **UI**：可測試的各畫面元件；不在 React event handler 內複製九種規則或拼接錯誤結果文案。
 
 跨模組依賴盡量單向：Domain 不依賴 React、瀏覽器、動畫或儲存；不要將每個模組做成可任意掛載的 Plugin。
@@ -81,6 +81,8 @@ type Mode = "learn" | "computer" | "together";
 type Outcome = "win" | "lose" | "tie";
 type RuleId = "rock-beats-scissors" | "scissors-beats-paper" |
               "paper-beats-rock" | "tie";
+type MasteryRuleId = Exclude<RuleId, "tie">; // 三組可學習且可解鎖的勝負規則
+type MasteryCounts = Record<MasteryRuleId, 0 | 1 | 2 | 3>; // 最多各 3 次合格首答
 
 type RoundResult = {
   playerGesture: Gesture;
@@ -127,13 +129,18 @@ same     = tie
 ### 5.1 建議的單回合狀態
 
 ~~~text
-home -> mode-select -> choosing
-choosing -> handoff (Together / Player 1 confirmed)
-handoff -> choosing (Together / Player 2)
-choosing -> ready (Learn or Computer)
-choosing -> ready (Together / Player 2 confirmed)
+home -> mode-select
+mode-select -> opponent-prompt -> choosing (Learn: show opponent first)
+mode-select -> choosing (Computer or Together)
+choosing -> choosing (Learn: incorrect answer -> hint -> retry)
+choosing -> ready (Learn: confirmed correct answer)
+choosing -> ready (Learn: parent requests direct demonstration; use correct winning gesture, do not mark independently correct)
+choosing -> opponent-hidden -> ready (Computer: player confirmed)
+choosing -> handoff (Together: Player 1 confirmed, hide choice)
+handoff -> choosing (Together: Player 2)
+choosing -> ready (Together: Player 2 confirmed)
 ready -> countdown -> race -> rule-effect -> feedback -> complete
-complete -> choosing (Play again)
+complete -> mode-specific new round (Play again)
 complete -> home
 ~~~
 
@@ -141,15 +148,18 @@ complete -> home
 - 只有在合法 state 才接受對應事件；開始後多次點按不會觸發第二次對局。
 - 每個回合建立一個唯一 round token；動畫／音訊非同步結束時須檢查 token，不能回寫舊回合結果。
 - 再玩一次或離開時取消正在進行的計時、動畫與語音，並清空上一局的選擇、結果與暫存成就通知。
+- 親子雙人於交接後返回、取消或重新載入時，不能重現上一位已確認的手勢選擇畫面；可安全清除並重開該局（Spec AC-09.1）。
 - 獎勵在「真正完成回合」時**最多發一次**，即使回放動畫、重複完成 callback 或重新渲染也不能重複授予。
-- 教學答錯只記錄嘗試與提示，不生成正式比賽的 lose 結果。
+- 教學選拳只在**按確認後**判定答對／錯；**第 1、2 次確認答錯**各給不洩漏正確答案的溫和提示，**第 3 次確認仍答錯**才揭曉正確答案；**每題最多 3 次提交，不接受第 4 次作答**。第二或第三次答對仍可完成教學但不獲首次無提示正確計數；第三次答錯後可觀看示範或開始新題。答錯不生成正式比賽的 lose 結果。
+- 教學的「直接看示範」是家長明確觸發的獨立路徑，依已知對手自動帶入正確獲勝手勢並提供短鼓勵，但**不記為孩子獨立答對，也不累計收藏進度**（Spec OQ-05＝C）。
+- 一題只有**首次確認前未受任何答案提示**且首次答案正確，才增加該題所屬 MasteryRuleId 的計數（上限 3）。錯答後補答、示範、對戰、重播與舊 callback 都不可計入。三組計數皆達 3 後再切換混合出題；不需連續三題。
 
 ### 5.2 關鍵 UI 保密細節（US-08、US-09）
 
 由於**每個手勢對應固定工程車**，一旦比賽開始就完整顯示對手車種，等於在揭曉前洩漏對手手勢。這需要明確解決：
 
 - **電腦對戰**：Ready 與 Race 階段只顯示玩家角色；對手使用被塵煙遮住的輪廓、工地帷幕或中性「神秘工程車」視覺，**不可依實際出拳露出可辨認車種或手勢**。中央 reveal 時再換成實際對手角色、接續規則動畫。
-- **親子雙人**：在 Player 1 選擇確認後切至完全遮蔽的交接頁；Player 2 確認前不得看到 Player 1 選項。比賽動畫可採同樣的隱藏式對手進場，在共同揭曉時才呈現雙方。
+- **親子雙人**：在 Player 1 選擇確認後切至完全遮蔽的交接頁；Player 2 確認前不得看到 Player 1 選項。共同揭曉前，**雙方可辨識的車種／手勢都應遮蔽**，倒數與競賽先呈現中性輪廓或遮擋，抵達中央後才同時呈現雙方。
 - **教學模式**：對手手勢本來就是提前展示的，可直接顯示雙方工程車，以便理解。
 
 上述是滿足 Spec「保密選拳」與「工程車比賽動畫」的建議視覺取捨；實際美術可在 prototype 中調整，但不能讓比賽模式提前洩漏猜拳手勢。
@@ -167,7 +177,7 @@ complete -> home
 ## 7. 中英文字、音訊與 Safari 行為
 
 - 文字與音訊依 stable key 管理（例如 gesture.rock、rule.paper-beats-rock、feedback.lose.calm），避免分散於多處判斷。
-- 預設播放繁中一句、英文一句；設定可切換中文／英文／雙語。UI 關鍵內容兩語仍有清晰對應（Spec §6）。
+- **所有畫面文字始終繁中與英文並列**（含次要 UI），不隨語音切換。語音僅有**雙語（預設：繁中→英文依序播放）／中文／英文**三種偏好；語音重播和倒數旁白也遵循此偏好（Spec §6.2、PRD §1.1）。
 - 音訊播放以可取消的隊列處理：倒數聲、規則旁白、愛的鼓勵、短音效不得互相覆蓋或重複。
 - iOS Safari 的音訊啟動需連到使用者按下「開始」等互動，若播放被拒絕，遊戲繼續且保留文字提示。
 - 預先錄製或具合法授權的語音／掌聲資產優先；Prototype 可以先採用替代音源。確保「愛的鼓勵」使用來源合法。
@@ -175,7 +185,9 @@ complete -> home
 
 ## 8. 本機進度與版本相容性
 
-- 建議本機資料包含：schemaVersion、unlockedCollectibleIds、completedLessonIds、languageMode、audioPreferences、reducedMotion。
+- 建議本機資料包含：schemaVersion、**masteryCountsByRuleId**（三種 MasteryRuleId 各 0～3）、unlockedCollectibleIds、**speechLanguageMode**（bilingual/zh/en）及 audioPreferences；若交付 FR-13（P1）再加 reducedMotion。不要把 `completedLessonIds` 或一般完成次數直接當成獨立掌握進度。
+- 由固定 **MasteryRuleId → collectibleId** 一對一對照判定首次達 3 時的解鎖；三位猜拳主角則始終可使用。額外收藏 ID 應穩定，既有 unlock 不可因對戰結果、示範或重播而倒退。資料寫入需使計數與解鎖狀態一致，重複提交／刷新不可重複加計；若儲存雙方資料，讀取時須避免不一致。
+- 提供三組規則依固定輪替題序進入混合出題的判斷；在 3/3/3 前仍固定輪替，在全滿後混合出題。單題資格由首次提交及是否出現額外提示的狀態決定。
 - 不儲存孩子姓名、照片、精確位置或任何攝影機資料（MVP 根本不開啟攝影機）。
 - 對未知 key、舊版本、無法解析 JSON、儲存配額不足或受限瀏覽器模式須有容錯；應以安全預設啟動遊戲。
 - **收藏 ID 持久且不重用**：新增角色不應導致舊收藏進度指向錯誤車種；若調整內容 id，需要明確版本遷移。
@@ -205,8 +217,8 @@ PRD §5.3 的 **IDEA-01～IDEA-07 是等待孩子試玩與家長回饋的假設�
 ### 10.1 自動化（建議）
 
 - Domain unit tests：全部 9 種結果、平手、結果對應 RuleId；對角色／場景變化不敏感。
-- Mode/controller tests：教學錯誤可重試且不計 lose；電腦選擇與玩家手勢獨立；雙人 handoff 全程不洩漏；回合只完成一次。
-- Reward tests：win／lose／tie 完成獎勵條件一致；replay、skip、重渲染不會重複發獎；收藏資料遷移／無法保存時仍可遊玩。
+- Mode/controller tests：教學第 1、2 次錯答各顯示**不直接洩漏答案**的提示；第 3 次仍錯才揭曉答案、封鎖第 4 次提交；第 2／3 次答對仍可完成本題但不加計，只有第 1 次確認正確才算無提示獨立答對；答錯後補答或示範不加計；電腦選擇與玩家手勢獨立；雙人 handoff 全程不洩漏；回合只完成一次。
+- Mastery/collectible tests：三組規則各需 **3 次不同題目的首次無提示正確**才能逐一解鎖其一對一收藏；2/3 不解鎖、3/3 只解鎖一次、全部 3/3/3 才混合；錯答補答、家長示範、電腦／親子 win／lose／tie、replay／skip、重渲染均不加計；以上仍可給短鼓勵。重新載入保留計數和收藏，寫入失敗不阻塞遊玩。
 - UI flows：三張選卡、點擊確認、倒數、遮蔽、結果、重玩、家長設定；音訊無法播放時不阻塞。
 - Content validation：每個 RuleId 有正確中英文案、對應動畫（或安全降級）；不存在第四個不合法 Gesture。
 - 減少動態：若 FR-13／US-13（P1）納入實作，跳過／重播後勝負、收藏與回合狀態不能改變；不將其默認升級為 P0。
@@ -225,20 +237,20 @@ PRD §5.3 的 **IDEA-01～IDEA-07 是等待孩子試玩與家長回饋的假設�
 | NFR-01 Compatibility | iPhone／iPad Safari 真機，Android 與桌面現代瀏覽器的實際流程記錄；交付網址可使用 HTTPS 開啟。 |
 | NFR-02 Usability | 實機檢查觸控區、安全區、直／橫向與幼兒試玩；56×56 CSS px 為 PRD 建議目標，不能取代實機操作證據。 |
 | NFR-03 Performance | **Milestone 1 量測**首次可操作時間、選拳回應延遲、動畫流暢度、等待時間，記錄裝置與條件；依試玩資料訂出最終 MVP 門檻，**不在技術設計預設未量測的數字**。 |
-| NFR-04 Reliability | 模擬音訊被阻擋、資產不存在、中斷、快速連點與舊回合 callback；結果仍正確且獎勵只發一次。 |
+| NFR-04 Reliability | 模擬音訊被阻擋、資產不存在、中斷、快速連點與舊回合 callback；結果仍正確，學習計數與收藏解鎖不重複。 |
 | NFR-05 Privacy & Safety | 實際檢查瀏覽器權限提示、網路請求及 UI，確認無兒童個資輸入／追蹤／付費；進度重設需二次確認。 |
 | NFR-06 Accessibility | 關聲音仍可辨識手勢與結果、非色彩唯一辨識；如交付 FR-13（P1），再測減少動態、跳過／重播的正確性。 |
-| NFR-07 Data Persistence | 重新載入、本機儲存不可用／損毀、語言切換及重設流程；記錄降級行為與資料相容性。 |
+| NFR-07 Data Persistence | 重新載入後三組 0～3 計數及已解鎖收藏保持一致、語音三選一持續保存；測試本機儲存不可用／損毀及二次確認重設，記錄降級行為與資料相容性。 |
 | NFR-08 Maintainability | 九組規則回歸測試；更換角色資產、文案與動畫後仍通過，不要求特定外部架構套件。 |
 
-Spec §6.4 的 `NFR-AC-xx.y` 是正式驗收條件；本節只是建議技術手段。依 Spec §10.3 保留裝置版本、測試結果、失敗情境及待修問題的驗收證據。
+Spec §9.4 的 `NFR-AC-xx.y` 是正式驗收條件；本節只是建議技術手段。依 Spec §10.3 保留裝置版本、測試結果、失敗情境及待修問題的驗收證據。
 
 ## 11. 交付順序與保留決策
 
 1. **M0**：搭起網頁骨架、純規則函式與狀態流程；用 placeholder 素材驗證觸控與一回合重玩。
 2. **M1**：完整第一條工地規則動畫 Vertical Slice（選車 → 倒數 → 比賽 → 因果 → 情緒回饋），先拿給孩子試玩，並取得 NFR-03 在目標 Safari 裝置上的初步效能基準。
-3. **M2**：完整 Learn / Computer / Together 三模式與三組勝負／平手動畫。
-4. **M3**：雙語語音、完整掌聲、收藏、本機資料、iOS 真機 QA，並完成 Spec §10.3 的 NFR 品質驗收及 NFR-03 定標／複測。
+3. **M2**：完整 Learn / Computer / Together 三模式與三組勝負／平手動畫；Learn 的首次無提示正確計數、**第 1／2 次錯答各提示、第 3 次錯答才揭曉及封鎖第 4 次提交**、3/3/3 後混合題皆能驗證。
+4. **M3**：全畫面中英並列、三模式語音、完整掌聲、按各規則 3 次合格答對解鎖的三台額外收藏、本機資料、iOS 真機 QA，並完成 Spec §10.3 的 NFR 品質驗收及 NFR-03 定標／複測。
 
 這是 PRD §6 的**技術落地建議**，不是已承諾的開發工期。
 
