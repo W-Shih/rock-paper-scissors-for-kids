@@ -10,6 +10,7 @@
 > 功能規格：[spec.md](spec.md)（Requirements / Behavior / Acceptance SSOT）
 > 技術設計：[docs/technical-design.md](docs/technical-design.md)（框架、架構、資料與測試方案）
 > 核心問題：**Why / What**
+> 文件職責：**定義為什麼開發、為誰開發、要解決什麼問題，以及產品範圍與優先級。**
 > 主要讀者：**產品規劃者、家長、設計者**
 
 **文件權威：** 本 PRD 定義產品願景、使用者、MVP 範圍及優先級、風險與探索想法；[spec.md](spec.md) 維護正式 FR／US／AC／NFR、可驗證的行為和 UX 細節。PRD 章節已重新編為 §1–§8；原 PRD v1.4 §6–§13 的正式細節由 Spec §3–§10 管理。

@@ -6,8 +6,11 @@
 > 產品意圖／範圍：[PRD.md](PRD.md)
 > 技術方案：[docs/technical-design.md](docs/technical-design.md)
 > 狀態：Ready for prototype / OQ-01～05 已定案（§10.4），待實機與孩子試玩驗證
-> 核心問題：**How / Exact Behavior**
+> 核心問題：**How must the product behave? / Exact Behavior & Acceptance Criteria**
+> 文件職責：**定義系統必須呈現什麼行為、各種情境如何處理，以及如何驗收。**
 > 主要讀者：**Coding Agent、工程師、測試**
+
+**How 的定義：** 此處的 **How** 指「**產品／系統在各種情境下應如何表現，以及如何驗收**」（*How must the product behave?*），**不是**「程式碼應如何實作」（*How should the code be implemented?*）。本文件描述可觀察行為、狀態轉移、例外情境及驗收標準；架構、框架、模組切分與程式設計方式由技術設計／實作計畫決定，不得由 Spec 無故預先限定。
 
 **文件權威：** 本文件是 FR、US、AC、NFR、NFR-AC、詳細 UX 流程及可驗證行為的唯一規格 SSOT。產品範圍、優先級及探索想法以 PRD 決策為準；若出現不一致，須先協調需求，不得自行擴大範圍。
 
