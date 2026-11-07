@@ -1,6 +1,6 @@
 # Technical Design — 工地猜拳大賽
 
-> 文件版本：TD v0.7（同步 Spec v1.5 的三次教學作答上限；Proposed / 待開發驗證）
+> 文件版本：TD v0.8（同步 Spec v1.6：第三次錯答後強制示範與計數時點；Proposed / 待開發驗證）
 > 日期：2026-11-06
 > 產品依據：[PRD](../PRD.md)（願景、範圍、優先級）
 > 功能依據：[Spec](../spec.md)（FR／US／AC／NFR 與驗收 SSOT）
@@ -132,7 +132,8 @@ same     = tie
 home -> mode-select
 mode-select -> opponent-prompt -> choosing (Learn: show opponent first)
 mode-select -> choosing (Computer or Together)
-choosing -> choosing (Learn: incorrect answer -> hint -> retry)
+choosing -> choosing (Learn: first or second incorrect answer -> hint -> retry)
+choosing -> ready (Learn: third incorrect answer -> reveal -> required correct demonstration; finish only after demonstration)
 choosing -> ready (Learn: confirmed correct answer)
 choosing -> ready (Learn: parent requests direct demonstration; use correct winning gesture, do not mark independently correct)
 choosing -> opponent-hidden -> ready (Computer: player confirmed)
@@ -149,10 +150,10 @@ complete -> home
 - 每個回合建立一個唯一 round token；動畫／音訊非同步結束時須檢查 token，不能回寫舊回合結果。
 - 再玩一次或離開時取消正在進行的計時、動畫與語音，並清空上一局的選擇、結果與暫存成就通知。
 - 親子雙人於交接後返回、取消或重新載入時，不能重現上一位已確認的手勢選擇畫面；可安全清除並重開該局（Spec AC-09.1）。
-- 獎勵在「真正完成回合」時**最多發一次**，即使回放動畫、重複完成 callback 或重新渲染也不能重複授予。
-- 教學選拳只在**按確認後**判定答對／錯；**第 1、2 次確認答錯**各給不洩漏正確答案的溫和提示，**第 3 次確認仍答錯**才揭曉正確答案；**每題最多 3 次提交，不接受第 4 次作答**。第二或第三次答對仍可完成教學但不獲首次無提示正確計數；第三次答錯後可觀看示範或開始新題。答錯不生成正式比賽的 lose 結果。
-- 教學的「直接看示範」是家長明確觸發的獨立路徑，依已知對手自動帶入正確獲勝手勢並提供短鼓勵，但**不記為孩子獨立答對，也不累計收藏進度**（Spec OQ-05＝C）。
-- 一題只有**首次確認前未受任何答案提示**且首次答案正確，才增加該題所屬 MasteryRuleId 的計數（上限 3）。錯答後補答、示範、對戰、重播與舊 callback 都不可計入。三組計數皆達 3 後再切換混合出題；不需連續三題。
+- 合格教學題在**首次正確確認提交時**生效計數與解鎖資格（每題最多一次）；解鎖慶祝可於回合完成後展示，但即使動畫失敗、回放、重新渲染或完成 callback 重複觸發，也不能漏計或重複發獎。
+- 教學選拳只在**按確認後**判定答對／錯；**第 1、2 次確認答錯**各給不洩漏正確答案的溫和提示，**第 3 次確認仍答錯**才揭曉正確答案；**每題最多 3 次提交，不接受第 4 次作答**。第二或第三次答對仍可完成教學但不獲首次無提示正確計數；第三次答錯後**自動播放正確規則示範並在完成示範後才允許新題或回首頁**。若動態資產失敗，改以完整靜態／簡化示範；不得以錯答產生正式比賽的 lose 結果。
+- 教學中家長的「直接看示範」是明確觸發的獨立路徑；第三次錯答則**自動強制示範**。兩者皆依已知對手帶入正確獲勝手勢並提供短鼓勵，但**不記為孩子獨立答對，也不累計收藏進度**（Spec §3.1、OQ-01／OQ-05）。
+- 一題只有**首次確認前未受任何答案提示**且首次答案正確，才增加該題所屬 MasteryRuleId 的計數（上限 3）。錯答後補答、主動／強制示範、對戰、重播與舊 callback 都不可計入。三組計數皆達 3 後再切換混合出題；不需連續三題，同一規則不同回合可重複相同題幹。
 
 ### 5.2 關鍵 UI 保密細節（US-08、US-09）
 

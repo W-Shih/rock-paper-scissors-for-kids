@@ -6,6 +6,7 @@
 
 | Document | Responsibility |
 | --- | --- |
+| [.specify/memory/constitution.md](.specify/memory/constitution.md) | Non-negotiable cross-stage product and delivery principles |
 | [PRD.md](PRD.md) | Product intent, goals, MVP scope, priority, risks and future ideas |
 | [spec.md](spec.md) | **Canonical Specification SSOT** — FR / US / AC / NFR / NFR-AC and detailed observable behavior |
 | [docs/technical-design.md](docs/technical-design.md) | Proposed engineering architecture and technical tradeoffs |
