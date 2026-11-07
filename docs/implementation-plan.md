@@ -5,6 +5,8 @@
 > Product scope: [PRD](../PRD.md)
 > Normative functional and acceptance SSOT: [Spec](../spec.md)
 > Engineering candidates: [Technical Design](technical-design.md)
+> 核心問題：**How will we deliver and verify it?**（Tasks / Execution / Verification）
+> 核心職責：**將核准的需求與技術方案拆解為執行階段、任務、依賴關係、驗證活動、完成條件及進度／證據追蹤；不自行核准產品範圍、改寫需求或降低驗收標準。**
 
 This is an execution plan, not an authority to change requirements. The PRD §5.3 IDEA list is excluded until explicitly approved.
 
@@ -28,13 +30,13 @@ This is an execution plan, not an authority to change requirements. The PRD §5.
 
 ## Phase M2 — All learning and competition modes
 
-- Implement Learn per the **resolved and revised** Spec OQ-01/OQ-02/OQ-05: opponent shown first; only confirm submits an answer; **first and second wrong answers each give a gentle non-answer hint, the third wrong answer reveals the correct answer and closes that question to further submissions** (maximum three attempts); parent-triggered demonstration gives only short encouragement, never independently correct credit (FR-03 / US-07).
+- Implement Learn per the **resolved and revised** Spec OQ-01/OQ-02/OQ-05: opponent shown first; only confirm submits an answer; **first and second wrong answers each give a gentle non-answer hint; the third wrong answer reveals the correct answer, disallows further submissions and automatically requires a correct-rule demonstration before the question can finish** (maximum three attempts; fallback to complete static/simplified teaching content if animation fails); parent-triggered demonstration remains a separate early-exit path with short encouragement, never independently correct credit (FR-03 / US-07).
 - Track **first-try, unprompted correct** answers by the three distinct winning rules (0–3 each, capped), at most once per qualified Learn question. After all three counts reach 3, switch from fixed rotation to mixed questions; no consecutive-correct streak required. Incorrect then correct, demonstration, ordinary competition, replay, and stale callbacks must not increase counts. Verify normal reload persistence and safe degradation.
 - Implement fair independent computer choice and hidden reveal (FR-04).
 - Implement same-screen two-player handoff and secret selection (FR-05).
 - Complete all three win relations and tie result; validate both left/right placements.
 
-**Exit evidence:** Spec US-07–US-09 acceptance and negative-path tests, including non-revealing hints on wrong attempts 1 and 2, revealing only on wrong attempt 3, no fourth answer, correct answers on attempts 2/3 not earning mastery credit, 2/3 vs 3/3 per-rule counts, 3/3/3 mixed-mode transition, no counting after hints/demo/replay, and same-screen secret selection.
+**Exit evidence:** Spec US-07–US-09 acceptance and negative-path tests, including non-revealing hints on wrong attempts 1 and 2, revealing only on wrong attempt 3, mandatory correct-rule demonstration before completion (including animation-failure fallback and FR-13 skip restrictions), no fourth answer, correct answers on attempts 2/3 not earning mastery credit, 2/3 vs 3/3 per-rule counts, 3/3/3 mixed-mode transition, no counting after hints/demo/replay, and same-screen secret selection.
 
 ## Phase M3 — Audio, collectibles and release quality
 

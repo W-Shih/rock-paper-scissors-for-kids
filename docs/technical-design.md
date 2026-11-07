@@ -5,7 +5,8 @@
 > 產品依據：[PRD](../PRD.md)（願景、範圍、優先級）
 > 功能依據：[Spec](../spec.md)（FR／US／AC／NFR 與驗收 SSOT）
 > 對應產品版本：MVP v1.0 — Browser-First / Touch-First
-> 文件目的：記錄可調整的技術方案、架構取捨及擴充策略；**不是**取代 PRD 的產品需求。
+> 核心問題：**How should the solution be engineered?**（Architecture / Engineering Decisions）
+> 核心職責：**在 PRD、Constitution 與 Spec 的約束下，提出並記錄技術架構、技術選型、模組與資料設計、工程取捨及驗證假設；技術方案可調整，不自行新增或修改產品需求與驗收標準。**
 
 ## 1. 技術目標、邊界與決策原則
 
