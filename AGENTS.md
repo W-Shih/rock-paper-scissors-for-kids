@@ -2,7 +2,7 @@
 
 ## Documentation authority (SDD / Scheme B)
 
-1. `.specify/memory/constitution.md` defines cross-stage non-negotiable principles and decision constraints; implementation choices remain flexible within these boundaries.
+1. `constitution.md` defines cross-stage non-negotiable principles and decision constraints; implementation choices remain flexible within these boundaries.
 2. `PRD.md` is the source of product intent: users, goals, scope, priorities, risks, uncommitted ideas and product-level decisions.
 3. `spec.md` is the **canonical functional specification SSOT**: FR / US / AC / NFR / NFR-AC definitions, observable behavior, game and UX flows, visual feedback rules and acceptance criteria.
 4. `docs/technical-design.md` records proposed architecture, technology choices, data structures and engineering tradeoffs. It is not a source of new product requirements.
