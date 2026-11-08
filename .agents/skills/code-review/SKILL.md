@@ -3,7 +3,7 @@ name: code-review
 description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 ---
 
-Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
+Two-axis review of a committed diff or the user's uncommitted work:
 
 - **Standards**: does the code conform to this repo's documented coding standards?
 - **Spec**: does the code faithfully implement the originating issue / spec?
@@ -14,13 +14,17 @@ The issue tracker should have been provided to you. If not, tell the user to run
 
 ## Process
 
-### 1. Pin the fixed point
+### 1. Pin the review scope
 
-Whatever the user said is the fixed point (a commit SHA, branch name, tag, `main`, `HEAD~5`, etc.). If they didn't specify one, ask for it.
+Choose the mode from the user's request:
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+- **Committed changes** (branch, PR, or "since X"): resolve the base and target to commit SHAs with `git rev-parse <ref>^{commit}`. The target defaults to `HEAD`; when the user names the branch to review, that branch is the target, not the base. Infer the base from an established PR or session context; ask if it remains ambiguous. Capture `git diff <base-sha>...<target-sha>` and `git log <base-sha>..<target-sha> --oneline`.
+- **WIP / uncommitted changes**: pin `HEAD` to a commit SHA. Capture staged changes with `git diff --cached <head-sha>` and unstaged changes with `git diff`. Enumerate non-ignored untracked files with `git ls-files --others --exclude-standard -z`, then capture their contents as new files. Keep the staged and unstaged layers distinct: comparing only `HEAD` to the working tree can hide staged edits that were subsequently undone in the working tree. A WIP-only review needs no other base and has no commits to list.
+- **Committed changes plus WIP**: capture both scopes above, labelling the committed, staged, unstaged and untracked layers separately. Do not silently add WIP to a committed-only review.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here, not inside two parallel sub-agents.
+Before dispatch, save one shared review snapshot outside the repository: resolved SHAs, capture commands, commit list where applicable, patches, file manifest, and captured file contents needed for context (including untracked files). Use index versions for staged context and working-tree versions for unstaged context. Preserve paths and binary files; report any content that cannot be inspected. Capture without changing the user's index or creating a commit or stash. Verify the selected refs and commands succeeded, and check that HEAD, the index and selected files did not change during capture; recapture if they did.
+
+Check emptiness across the entire selected scope. An empty committed patch must not stop a WIP review with staged, unstaged or untracked changes. If every selected layer is empty, report no changes to review and stop before spawning reviewers.
 
 ### 2. Identify the spec source
 
@@ -57,17 +61,17 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
-Issue both sub-agent calls together, in the foreground, and aggregate the reports they return.
+Issue both sub-agent calls together, in the foreground, and aggregate the reports they return. Both reviewers use the same saved snapshot from step 1 rather than rerunning capture commands against the live working tree. If live content is needed, verify it still matches the snapshot; changed content requires a new snapshot and review of the affected scope.
 
 **Standards sub-agent prompt** should include:
 
-- The full diff command and commit list.
+- The review mode and shared snapshot path from step 1, including capture commands and the commit list where applicable.
 - The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full (the sub-agent has no other access to it).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** should include:
 
-- The diff command and commit list.
+- The same review mode and shared snapshot path supplied to the Standards reviewer.
 - The path or fetched contents of the spec.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
 
