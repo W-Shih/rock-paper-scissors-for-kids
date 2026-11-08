@@ -1,7 +1,7 @@
 # MVP Implementation Plan — Construction Site RPS Adventure
 
 > **計畫版本**：v2.0（2026-11-06；依 Spec v1.6、Technical Design v0.10 拆解）
-> **計畫狀態**：Ready for M0 execution；所有工作尚未開始，M0 Architecture Gate 尚未通過
+> **計畫狀態**：M0 execution started；M0-01 Done（2026-11-08），其餘任務尚未開始，M0 Architecture Gate 尚未通過
 > **交付版本**：MVP v1.0，Browser-First / Touch-First
 > **核心問題**：**How will we deliver and verify it?**（Tasks / Execution / Verification）
 > **核心職責**：**依已核准的規格與技術設計，拆成可獨立實作、測試和驗收的工作項目，定義依賴、里程碑、完成條件及驗證證據；不自行新增產品承諾、改寫行為或降低驗收標準。**
@@ -13,7 +13,7 @@
 - **不在此計畫**：PRD §5.3 的 IDEA-01～07（更多場景／車輛擴充、鏡頭辨識、三人猜拳等）、原生 App、PWA、後端、帳號、分析追蹤；不得為未承諾的想法預建 framework、plugin、service 或通用 DSL。
 - **暫定技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 **尚未 confirmed**，只允許 M0 最小 Spike；通過 Architecture Gate 後才進入 M1 正式 UI。React 是有條件備選，**不**同時完整開發兩套遊戲。
 - **任務切分**：每個 `Mx-yy` 是一個可獨立審查／交付的垂直或工程工作項，列有「前置」「交付」「驗證／Done」「追蹤」。同里程碑內無依賴的任務可並行；不要以文件列出的先後順序虛構必要依賴。
-- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。本輪僅完成**規劃**，下列任務一律 `Not started`；原型、測試、部署、裝置試玩均**未宣稱已執行**。
+- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01 已完成工具鏈與 smoke tests，證據見該任務；其餘任務仍為 `Not started`。未宣稱已部署或完成裝置／親子試玩。
 - **每項任務的 Done**：有可檢閱的程式碼或資產／文件變更、與變更風險相稱的新增測試（含失敗／邊界路徑）、適用的 typecheck／lint／test／build 結果、對應 AC／NFR-AC 的驗證證據及未解問題。僅寫程式、只有 happy path、或測試未執行，不能標記為 `Done`。
 - **變更控制**：產品範圍先由 PRD 決策，行為與驗收先修 Spec，純工程取捨記 Technical Design，再更新本計畫；保留 FR／US／AC／NFR IDs。不得只為綠燈而弱化既有有效測試；需修改時附原因與原驗收語義是否仍有保障。
 - **證據真實性**：自動化、Playwright WebKit、iPhone/iPad 真實 Safari、家長／幼兒試玩是不同證據。缺少實機或家庭試玩時記 `Blocked / Not verified`，不得以模擬器或猜測取代。
@@ -42,10 +42,12 @@
 
 ## 2. M0 — 最小 Technical Spike 與 Architecture Decision Gate
 
-> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。所有 M0 任務目前為 `Not started`。
+> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01 已完成；其餘 M0 任務為 `Not started`。
 
 ### M0-01 — 可重現的開發與測試骨架
 
+- **狀態**：`Done` — 2026-11-08。
+- **實作／證據**：單 package、strict TypeScript、固定版本與 lockfile、ESLint、Vitest／DOM Testing Library、Chromium／WebKit Playwright，以及中英 placeholder。乾淨安裝、四項品質指令與 2/2 Vitest + 2/2 E2E 通過；實際版本、命令、環境修復及限制見 [開發與驗證紀錄](development.md)。僅建立 NFR-08 工程基線，九組規則、架構選型及真機驗收尚未完成。
 - **前置**：無。
 - **交付**：單 package 的 Vite `vanilla-ts`、TypeScript strict、npm lockfile、適合當時相依版本的 Node LTS／`engines`；Vitest + DOM Testing Library，Playwright Chromium／WebKit 基本設定；`typecheck`、`lint`、`test`、`build` 指令。只建實際需要的檔案，不建立空殼架構。
 - **驗證／Done**：乾淨安裝及四項品質指令可重現；至少一個純函式單測、一個 DOM smoke 測試與可 build 的 placeholder 頁面；紀錄實際版本與命令輸出。若 Playwright browser 安裝受限，記錄限制與後續執行方式。
@@ -374,6 +376,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Start here：`M0-01 — 可重現的開發與測試骨架`。** 前置需求為零，先建立版本固定的工具鏈並跑 smoke tests，接著完成 M0-02；之後 M0-03 與 M0-04 可並行。待必要前置就緒，再以 M0-05／06 收集代表性 UI 證據，最後進行 M0-07 選型 Gate。
+**Next：`M0-02 — 唯一猜拳規則與手勢／角色映射`。** M0-01 工具鏈與 smoke tests 已完成；接著完成 M0-02，之後 M0-03 與 M0-04 可並行。待必要前置就緒，再以 M0-05／06 收集代表性 UI 證據，最後進行 M0-07 選型 Gate。
 
-**本輪交付邊界**：僅定稿 `docs/implementation-plan.md` 的任務、依賴、驗證與 Gate；**未實作、未測試、未取得實機或幼兒試玩證據、未發布**。下一輪執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
+**本輪交付邊界**：僅完成 M0-01 開發與測試骨架及適用自動化驗證；**未完成其他任務、未取得實機或幼兒試玩證據、未部署或發布產品**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
