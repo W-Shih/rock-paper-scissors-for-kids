@@ -11,10 +11,12 @@ metadata:
 
 Use this template for writing the PR body:
 
+For this repository, write PR titles and explanatory prose primarily in Traditional Chinese (zh-TW), unless the user explicitly requests another language. Keep template labels such as Summary, Evidence, Merge Danger, Before, After, Door, and Blast Radius in English. Technical terms such as controller, reducer, and callback may remain in English, including in diagrams. Preserve code identifiers, commands, paths, requirement IDs, and official names; prioritize natural, readable explanations over translating every term.
+
 ```markdown
 ## Summary
 
-<diagram, diff-sketch, or tree>
+<renderable diagram; optional supporting sketch or tree>
 
 ## Evidence
 
@@ -35,6 +37,10 @@ Use this template for writing the PR body:
 ## Sections
 
 Skip all preambles and keep prose brief. Use the user's domain language from `GLOSSARY.md`.
+
+### Required visual
+
+Every PR Summary **must include at least one renderable diagram** that explains the actual change, such as a Mermaid flow, sequence, or relationship diagram. Prefer Mermaid when suitable. A text tree, pseudocode, or diff sketch may supplement the diagram, but does not satisfy this requirement by itself. Choose the smallest diagram that makes the changed behavior, relationships, or boundaries clear; do not add diagrams unrelated to the diff.
 
 ### Summary
 
@@ -153,7 +159,7 @@ function expandSkill(command: string): string {
 
 Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
 
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+Use these supporting formats to supplement the required diagram when helpful. Use your judgement and don't overwhelm the user.
 
 ### Evidence
 
