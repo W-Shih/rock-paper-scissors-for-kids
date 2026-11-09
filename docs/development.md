@@ -16,16 +16,14 @@ were checked when selecting this baseline.
 
 ```sh
 npm ci
-npm run typecheck
-npm run lint
-npm test
-npm run build
 npx playwright install chromium webkit
-npm run test:e2e
+npm run check
 ```
 
 `npm run dev` starts development. `npm run preview` serves the built `dist/`.
-Build before E2E: Playwright starts its own production preview on
+`npm run check` runs typecheck, lint, unit/DOM tests and `test:e2e` in order,
+stopping on the first failure. `test:e2e` always builds before invoking
+Playwright, including when called on its own. Playwright starts its production preview on
 `127.0.0.1:4173` with a strict port and does not reuse an existing server.
 If browser downloads are restricted, rerun the install command in an allowed
 environment and then `npm run test:e2e`; do not count missing browsers as a pass.
@@ -338,3 +336,66 @@ dependency installation, clean CI install, and failed-run artifact upload have
 not been executed; they must be confirmed after pushing the workflow. No GitHub
 branch-protection settings were changed. Safari real-device, parent/child and
 release acceptance remain unverified; M0-GATE status is unchanged.
+
+## First-layer quality gate (2026-11-09)
+
+Engineering-only follow-up; no product requirements, game behavior, storage
+format or existing test assertions changed. The earlier audit described a
+pre-CI baseline; by this follow-up, PR #14 had added CI and GitHub had successful
+hosted runs. This change extends that workflow rather than adding another one.
+
+Local and CI validation now share `npm run check`. It runs typecheck, lint,
+unit/DOM tests, then `test:e2e`; the latter always builds before Playwright so a
+standalone E2E invocation cannot silently serve an older bundle. The existing
+20-minute CI job cap and 10-minute browser cap remain, as do Chromium/WebKit,
+single-worker execution, no retries, and failure traces. CI selects line/HTML
+reporters in Playwright config; failure reports are uploaded for seven days.
+
+ESLint project service enables only two additional type-aware rules:
+`@typescript-eslint/no-floating-promises` and
+`@typescript-eslint/no-misused-promises`. An in-memory negative probe using the
+real ESLint config and `src/main.ts` path confirmed that an unhandled
+`Promise.resolve()` and an async DOM event callback are rejected by the intended
+rules; an explicitly caught Promise is accepted. No fixture was left in source.
+
+Validation used Windows x64, Node 24.22.1 and npm 10.9.2. The supported Node was
+prepended to PATH and npm was invoked through the documented CLI path; nested
+package scripts resolved correctly. Browser execution used the actual-user
+context because sandbox launches previously failed with `spawn EPERM`.
+
+| Check | Result |
+| --- | --- |
+| Clean `npm ci --no-fund` | Exit 0; 174 packages installed from unchanged lockfile |
+| `npm run check` | Exit 0; typecheck, zero-warning lint, 68/68 unit/DOM tests, production build and 12/12 E2E passed |
+| New lint negative/positive probes | Both invalid cases rejected; handled Promise accepted |
+| Original WebKit reload test, `--repeat-each=3` then `--repeat-each=10` | 13/13 passed before the full quality run |
+
+**WebKit investigation:** the earlier audit observed `Target page, context or
+browser has been closed` and `page.reload: Page crashed`; a concurrent shell also
+reported `System.OutOfMemoryException`. This follow-up could not reproduce the
+crash with the unchanged original test in 13 repetitions or the complete suite.
+At the follow-up snapshot the host had about 42.8 GiB available physical memory;
+no causal memory-pressure correlation was established. Resource pressure,
+Windows WebKit instability, and application lifecycle behavior were considered,
+but none was proven. Root cause remains unresolved; the passing runs are new
+evidence, not proof that the earlier failure is fixed. No speculative gameplay
+patch, assertion relaxation, browser exclusion or automatic retry was added.
+Future failures retain traces/reports for diagnosis on both local and CI hosts.
+
+**GitHub merge gate:** the API initially reported unprotected `main` and no
+rulesets. Branch protection now requires the actual GitHub Actions check
+`Quality and browser tests` (app ID 15368), requires an up-to-date branch and a
+PR, and applies to administrators. Required human approval count is zero.
+Existing successful main check runs established the exact check name before
+activation. Repository settings are external state; changing this commit alone
+does not remove protection. An administrator can roll back the protection through
+repository settings; changes should preserve the CI job name or migrate the
+required check in the same rollout.
+
+**Open dependency finding:** `npm audit` reports ten moderate findings in the
+development lint dependency chain, rooted in the minimatch advisory
+[GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), with zero
+high/critical findings. Dependencies and lockfile were not changed; remediation
+requires separate compatibility evaluation rather than `npm audit fix --force`.
+This gate does not claim a clean dependency-security audit, Safari real-device
+acceptance, parent/child trials, M0-GATE completion or release readiness.

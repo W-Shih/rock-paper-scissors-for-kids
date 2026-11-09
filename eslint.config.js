@@ -6,6 +6,14 @@ export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'] },
   js.configs.recommended,
   tseslint.configs.recommended,
+  {
+    files: ['**/*.ts'],
+    languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+    },
+  },
   { languageOptions: { globals: globals.node } },
   { files: ['src/**/*.ts'], languageOptions: { globals: globals.browser } },
 );

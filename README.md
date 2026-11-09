@@ -17,6 +17,10 @@
 
 **Current status:** Documentation ready for prototype; completion and real-device acceptance are not yet verified.
 
+For setup and validation, see [Development baseline](docs/development.md).
+Run `npm run check` for typecheck, lint, unit/DOM tests, production build and
+Chromium/WebKit E2E. Browser binaries must be installed first as documented.
+
 ## Continuous integration
 
 [CI](.github/workflows/ci.yml) runs on pull requests, pushes to `main`, or manually

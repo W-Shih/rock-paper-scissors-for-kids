@@ -15,7 +15,8 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "build": "tsc --noEmit && vite build",
-    "test:e2e": "playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "check": "npm run typecheck && npm run lint && npm test && npm run test:e2e"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
