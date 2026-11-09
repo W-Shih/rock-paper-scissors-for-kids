@@ -75,14 +75,19 @@ real iPhone/iPad Safari acceptance, child/parent trials or MVP release readiness
 clock and media effects. The controller covers provisional selection and
 confirmation, Learn's known-opponent setup, an independently injected Computer
 gesture, Together's handoff, countdown/approach/reveal/complete phases, replay
-and Home invalidation. Media failure and a stalled phase watchdog advance the
-already-decided result; old round/phase callbacks are ignored. Learn hints,
+and Home invalidation. Media failure and a stalled phase watchdog enter an
+explicit static reveal of the already-decided result, awaiting the renderer's
+completion acknowledgement rather than treating failure as successful display;
+old round/phase callbacks are ignored. Learn hints,
 three-attempt teaching flow and mastery accounting remain M0-05 scope.
 
 `src/round-controller.test.ts` uses injected fake clock and media notifications
 to verify one confirmation/result, illegal events, the Together handoff, replay
 state clearing, stale callback/timer invalidation, watchdog fallback without
-recalculation, and random gesture mapping.
+recalculation, and random gesture mapping. PR delivery regressions additionally
+cover synchronous subscriber Home/disposal, synchronous media completion,
+media start/cancellation exceptions, replay callbacks, and direct reducer
+round/phase-token rejection.
 
 Validation used Node 24.22.1 and npm 10.9.2 via the runtime paths documented in
 the M0-01 section. The system npm shim still points to a missing installation;
@@ -92,7 +97,7 @@ the supported runtime invocation succeeded:
 | --- | --- |
 | `npm run typecheck` | Exit 0 |
 | `npm run lint` | Exit 0; zero warnings |
-| `npm test` | Exit 0; 4 files, 21 tests passed |
+| `npm test` | Exit 0; 4 files, 27 tests passed |
 | `npm run build` | Exit 0; production bundle built |
 | `npm run test:e2e` | Not run; this controller-only task adds no DOM/UI behavior |
 

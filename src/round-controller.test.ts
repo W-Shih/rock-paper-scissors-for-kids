@@ -80,8 +80,87 @@ describe('round controller', () => {
     controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
     const lockedResult = controller.getState().result;
     scheduled.at(-1)!.callback();
-    expect(controller.getState().phase).toBe('approach');
+    expect(controller.getState()).toMatchObject({ phase: 'reveal', presentation: 'static' });
     expect(controller.getState().result).toBe(lockedResult);
+    controller.dispatch({ type: 'MEDIA_FAILED', roundId: 1, phase: 'reveal' });
+    expect(controller.getState().phase).toBe('reveal');
+    controller.dispatch({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'reveal' });
+    expect(controller.getState().phase).toBe('complete');
+  });
+
+  test.each(['home', 'dispose'] as const)('subscriber %s prevents the outer transition starting stale effects', (action) => {
+    const { controller, played, scheduled } = harness();
+    controller.subscribe((state) => {
+      if (state.phase === 'countdown') {
+        if (action === 'home') controller.dispatch({ type: 'HOME' });
+        else controller.dispose();
+      }
+    });
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'rock' });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(played).toHaveLength(0);
+    expect(scheduled).toHaveLength(0);
+    if (action === 'home') expect(controller.getState().phase).toBe('home');
+  });
+
+  test('synchronous media exception enters static reveal and awaits rendered acknowledgement', () => {
+    let cancelled = false;
+    const controller = createRoundController({
+      random: () => 0,
+      clock: { schedule: () => 1, cancel: () => { cancelled = true; } },
+      media: { play() { throw new Error('missing animation'); } },
+    });
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'paper' });
+    expect(() => controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 })).not.toThrow();
+    expect(cancelled).toBe(true);
+    expect(controller.getState()).toMatchObject({ phase: 'reveal', presentation: 'static', result: { outcome: 'win' } });
+  });
+
+  test('synchronous completion cancels returned handles instead of leaking effects', () => {
+    let cancellations = 0;
+    const controller = createRoundController({
+      random: () => 0,
+      clock: { schedule: () => 1, cancel: () => undefined },
+      media: { play(effect, notify) {
+        notify({ type: 'MEDIA_FINISHED', roundId: effect.roundId, phase: effect.phase });
+        return () => { cancellations++; };
+      } },
+    });
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'paper' });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(controller.getState().phase).toBe('complete');
+    expect(cancellations).toBe(3);
+  });
+
+  test('throwing media cancellation still permits Home to clear round state', () => {
+    const controller = createRoundController({
+      random: () => 0,
+      clock: { schedule: () => 1, cancel: () => undefined },
+      media: { play: () => () => { throw new Error('cancel failed'); } },
+    });
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'paper' });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(() => controller.dispatch({ type: 'HOME' })).not.toThrow();
+    expect(controller.getState()).toMatchObject({ phase: 'home', result: null });
+  });
+
+  test('replay rejects old phase callbacks and direct reducer rejects stale round or phase notifications', () => {
+    const { controller, played, completeCurrent } = harness();
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'paper' });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    const oldNotify = played[0]!.notify;
+    completeCurrent(); completeCurrent(); completeCurrent();
+    controller.dispatch({ type: 'REPLAY' });
+    const fresh = controller.getState();
+    oldNotify({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+    expect(controller.getState()).toBe(fresh);
+    expect(reduceRound(fresh, { type: 'MEDIA_FINISHED', roundId: 1, phase: fresh.phase }).state).toBe(fresh);
+    expect(reduceRound(fresh, { type: 'MEDIA_FINISHED', roundId: fresh.roundId, phase: 'reveal' }).state).toBe(fresh);
   });
 
   test('computer choice maps injected random values uniformly by bucket', () => {

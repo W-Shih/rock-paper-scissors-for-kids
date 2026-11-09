@@ -6,6 +6,7 @@ export type RoundState = Readonly<{
   roundId: number;
   mode: GameMode | null;
   phase: RoundPhase;
+  presentation: 'animated' | 'static';
   opponentGesture: Gesture | null;
   player1Selection: Gesture | null;
   player2Selection: Gesture | null;
@@ -23,12 +24,12 @@ export type RoundEffect = Readonly<{ type: 'PLAY_PHASE'; roundId: number; phase:
 export type RoundTransition = Readonly<{ state: RoundState; effects: readonly RoundEffect[] }>;
 
 export const initialRoundState: RoundState = {
-  roundId: 0, mode: null, phase: 'home', opponentGesture: null,
+  roundId: 0, mode: null, phase: 'home', presentation: 'animated', opponentGesture: null,
   player1Selection: null, player2Selection: null, result: null,
 };
 
 function freshRound(roundId: number, mode: GameMode | null, opponentGesture: Gesture | null): RoundState {
-  return { roundId, mode, phase: mode ? 'choosing-p1' : 'home', opponentGesture,
+  return { roundId, mode, phase: mode ? 'choosing-p1' : 'home', presentation: 'animated', opponentGesture,
     player1Selection: null, player2Selection: null, result: null };
 }
 
@@ -71,6 +72,12 @@ export function reduceRound(state: RoundState, event: RoundEvent, computerGestur
   }
   if (event.type === 'MEDIA_FINISHED' || event.type === 'MEDIA_FAILED') {
     if (event.roundId !== state.roundId || event.phase !== state.phase) return { state, effects: [] };
+    if (event.type === 'MEDIA_FAILED' && state.result) {
+      if (state.presentation === 'static') return { state, effects: [] };
+      // The renderer must present the complete static explanation and explicitly
+      // acknowledge it. A failed animation/watchdog is not proof it was shown.
+      return { state: { ...state, phase: 'reveal', presentation: 'static' }, effects: [] };
+    }
     if (state.phase === 'handoff') return enterPhase(state, 'choosing-p2');
     if (state.phase === 'countdown') return enterPhase(state, 'approach');
     if (state.phase === 'approach') return enterPhase(state, 'reveal');
@@ -104,31 +111,41 @@ export function createRoundController(options: RoundControllerOptions) {
   let watchdog: unknown;
   let cancelMedia: (() => void) | undefined;
   let phaseToken = 0;
+  let disposed = false;
   const listeners = new Set<(state: RoundState) => void>();
   const clearEffects = () => {
     phaseToken++;
     if (watchdog !== undefined) options.clock.cancel(watchdog);
     watchdog = undefined;
-    cancelMedia?.();
+    const cancel = cancelMedia;
     cancelMedia = undefined;
+    try { cancel?.(); } catch { /* An adapter failure must not prevent leaving the round. */ }
   };
   const dispatch = (event: RoundEvent): RoundState => {
+    if (disposed) return state;
     const oldId = state.roundId;
     const computer = event.type === 'CONFIRM_SELECTION' && event.player === 1 && state.phase === 'choosing-p1'
       && state.mode === 'computer' && state.player1Selection
       ? chooseComputerGesture(options.random ?? Math.random) : undefined;
     const transition = reduceRound(state, event, computer);
     if (transition.state === state) return state;
-    if (transition.state.roundId !== oldId || transition.state.phase !== state.phase) clearEffects();
+    if (transition.state.roundId !== oldId || transition.state.phase !== state.phase
+      || transition.state.presentation !== state.presentation) clearEffects();
     state = transition.state;
+    const transitionToken = phaseToken;
     listeners.forEach((listener) => listener(state));
+    if (disposed || state !== transition.state || transitionToken !== phaseToken) return state;
     for (const effect of transition.effects) {
       const token = phaseToken;
       const notify = (mediaEvent: RoundEvent) => { if (token === phaseToken) dispatch(mediaEvent); };
       watchdog = options.clock.schedule(() => notify({ type: 'MEDIA_FAILED', roundId: effect.roundId, phase: effect.phase }), options.watchdogMs ?? 5000);
-      const cancel = options.media.play(effect, notify);
-      if (token === phaseToken) cancelMedia = cancel || undefined;
-      else cancel?.();
+      try {
+        const cancel = options.media.play(effect, notify);
+        if (token === phaseToken) cancelMedia = cancel || undefined;
+        else cancel?.();
+      } catch {
+        notify({ type: 'MEDIA_FAILED', roundId: effect.roundId, phase: effect.phase });
+      }
     }
     return state;
   };
@@ -136,7 +153,7 @@ export function createRoundController(options: RoundControllerOptions) {
     getState: () => state,
     dispatch,
     subscribe(listener: (state: RoundState) => void) { listeners.add(listener); return () => listeners.delete(listener); },
-    dispose() { clearEffects(); listeners.clear(); },
+    dispose() { disposed = true; clearEffects(); listeners.clear(); },
   };
 }
 

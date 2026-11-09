@@ -69,7 +69,7 @@
 - **交付**：獨立於 DOM 的合法模式／相位轉移、`roundId` / generation token、只在確認時鎖定選擇、效果邊界與可注入亂數／時鐘／媒體通知；保持最小而可測，不造通用狀態機 Framework。
 - **實作／證據**：[src/round-controller.ts](../src/round-controller.ts) 提供純 reducer 與小型 controller：選擇／確認分離、Learn／Computer／Together 的基本單回合路徑、roundId 隔離、注入 computer random／clock／media、取消媒體與 watchdog 靜態降級。對照事件及 timer 測試見 [src/round-controller.test.ts](../src/round-controller.test.ts)。Learn 題目提示／三次答題／Mastery 不在本任務範圍，留 M0-05。
 - **驗證／Done**：選卡不等於提交、連點只確認一次、非法相位事件無效、回首頁／重開後舊 timer／動畫 callback 被忽略、媒體回報不重算結果；使用 fake clock／effects 單測。
-- **驗證結果**：Node 24.22.1／npm 10.9.2，`npm run typecheck`、`npm run lint`、`npm test`（4 files／21 tests）、`npm run build` 全部通過；完整記錄見 [開發與驗證紀錄](development.md)。未跑 E2E：本任務沒有 DOM／UI 變更；未作真機／幼兒驗收。
+- **驗證結果**：Node 24.22.1／npm 10.9.2，`npm run typecheck`、`npm run lint`、`npm test`（4 files／27 tests）、`npm run build` 全部通過；PR 審查補上同步 listener 離開／dispose、媒體啟動／取消例外及明確靜態 reveal 的回歸測試。靜態內容需 renderer 回報已呈現，不以媒體失敗當作展示完成。完整記錄見 [開發與驗證紀錄](development.md)。未跑 E2E：本任務沒有 DOM／UI 變更；未作真機／幼兒驗收。
 - **追蹤**：FR-02／10；AC-01.3、AC-06.1～06.3；NFR-AC-04.3；TD §6。
 
 ### M0-04 — 最小版本化進度保存 Adapter
