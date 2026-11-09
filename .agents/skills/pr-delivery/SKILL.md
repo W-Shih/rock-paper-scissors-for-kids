@@ -55,6 +55,10 @@ status unnecessarily. Use `pr` to write its body, reflecting the actual final
 scope, change type, evidence, door classification and blast radius. Include a
 practical rollback explanation. Update preliminary evidence after verification.
 Use the glossary location specified by AGENTS when `pr` says `GLOSSARY.md`.
+Complete `pr`'s [link validation gate](../pr/references/link-validation.md)
+before publishing, then read back and validate the saved PR body. Resolve
+repository file links against the pushed head commit, including files absent
+from the base branch.
 
 Provide `code-review` with the verified repository / PR reference, pinned base
 and head, canonical specification and relevant task references from AGENTS.
@@ -99,6 +103,9 @@ after a genuine unresolved blocker, complete unaffected work and report it.
 - The final remote head is the reviewed and verified commit; changes to the
   base have been assessed, with necessary integration checks repeated.
 - Required checks and repository merge / review requirements are satisfied.
+- The saved PR body and delivery / review comments authored in this delivery
+  pass `pr`'s link validation gate; unresolved broken or unverified links are
+  reported and delivery remains incomplete until repaired or resolved.
 
 Reversibility alone is not evidence of low risk. Assess the actual consequences,
 including data compatibility, privacy, child experience and delivery permissions
@@ -119,6 +126,11 @@ Update the PR body through `pr` and post a final review summary with the reviewe
 head and base SHAs, separate Standards / Spec conclusions, fixes, verification,
 remaining limitations, risk / rollback assessment and the merge or hold reason.
 Link existing evidence instead of duplicating canonical requirements.
+Repeat `pr`'s link validation gate on the final saved body and the posted review
+summary, including any edits after review. Record the checked head SHA, link
+targets and results in the delivery evidence. Revalidate affected links after
+head changes; evidence intentionally citing an earlier commit may retain that
+verified permalink. Complete this check before marking Ready or merging.
 
 For an eligible PR, mark it Ready and merge under the repository's merge policy.
 If no policy is specified, prefer a merge commit to retain the delivery boundary.
