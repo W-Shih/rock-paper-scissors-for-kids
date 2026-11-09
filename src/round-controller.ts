@@ -156,4 +156,3 @@ export function createRoundController(options: RoundControllerOptions) {
     dispose() { disposed = true; clearEffects(); listeners.clear(); },
   };
 }
-
