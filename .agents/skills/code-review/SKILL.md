@@ -61,6 +61,11 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
+Read [model routing](../implement/references/model-routing.md). Explicitly select
+its reviewer model and effort for each axis, including any risk-based escalation.
+Keep the main agent's current settings for aggregation. Reviewers report findings
+without editing the reviewed files.
+
 Issue both sub-agent calls together, in the foreground, and aggregate the reports they return. Both reviewers use the same saved snapshot from step 1 rather than rerunning capture commands against the live working tree. If live content is needed, verify it still matches the snapshot; changed content requires a new snapshot and review of the affected scope.
 
 **Standards sub-agent prompt** should include:

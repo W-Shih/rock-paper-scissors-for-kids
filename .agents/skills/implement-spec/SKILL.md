@@ -14,6 +14,11 @@ The tickets are not a list of steps. They are a **task graph** with blocking rel
 
 Start every subagent with a fresh context window.
 
+Read [model routing](../implement/references/model-routing.md) before dispatch.
+Apply its implementer defaults and escalation rules to each ticket and review
+fix; exploration and merger helpers inherit the parent settings. The main agent
+keeps its current settings and coordinates the task graph.
+
 Communication to and from subagents should be sparse. Communicate primarily through **context pointers**: to the spec, tickets, research notes, and previous commits. Don't duplicate information already available via pointers.
 
 **Implementer subagents** should be run in the background where possible for maximum concurrency.
