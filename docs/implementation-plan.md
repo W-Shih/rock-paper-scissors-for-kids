@@ -1,7 +1,7 @@
 # MVP Implementation Plan — Construction Site RPS Adventure
 
 > **計畫版本**：v2.0（2026-11-06；依 Spec v1.6、Technical Design v0.10 拆解）
-> **計畫狀態**：M0 execution started；M0-01～M0-03 Done（2026-11-08），M0-04 之後尚未開始，M0 Architecture Gate 尚未通過
+> **計畫狀態**：M0 execution started；M0-01～M0-04 Done（M0-04：2026-11-09），M0-05 之後尚未開始，M0 Architecture Gate 尚未通過
 > **交付版本**：MVP v1.0，Browser-First / Touch-First
 > **核心問題**：**How will we deliver and verify it?**（Tasks / Execution / Verification）
 > **核心職責**：**依已核准的規格與技術設計，拆成可獨立實作、測試和驗收的工作項目，定義依賴、里程碑、完成條件及驗證證據；不自行新增產品承諾、改寫行為或降低驗收標準。**
@@ -13,7 +13,7 @@
 - **不在此計畫**：PRD §5.3 的 IDEA-01～07（更多場景／車輛擴充、鏡頭辨識、三人猜拳等）、原生 App、PWA、後端、帳號、分析追蹤；不得為未承諾的想法預建 framework、plugin、service 或通用 DSL。
 - **暫定技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 **尚未 confirmed**，只允許 M0 最小 Spike；通過 Architecture Gate 後才進入 M1 正式 UI。React 是有條件備選，**不**同時完整開發兩套遊戲。
 - **任務切分**：每個 `Mx-yy` 是一個可獨立審查／交付的垂直或工程工作項，列有「前置」「交付」「驗證／Done」「追蹤」。同里程碑內無依賴的任務可並行；不要以文件列出的先後順序虛構必要依賴。
-- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01 工具鏈與 M0-02 規則 Domain 已完成，證據見任務及[開發與驗證紀錄](development.md)；其餘任務仍為 `Not started`。未宣稱已部署或完成裝置／親子試玩。
+- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01～M0-04 已完成，證據見各任務及[開發與驗證紀錄](development.md)；M0-05 之後尚未開始。未宣稱已部署或完成裝置／親子試玩。
 - **每項任務的 Done**：有可檢閱的程式碼或資產／文件變更、與變更風險相稱的新增測試（含失敗／邊界路徑）、適用的 typecheck／lint／test／build 結果、對應 AC／NFR-AC 的驗證證據及未解問題。僅寫程式、只有 happy path、或測試未執行，不能標記為 `Done`。
 - **變更控制**：產品範圍先由 PRD 決策，行為與驗收先修 Spec，純工程取捨記 Technical Design，再更新本計畫；保留 FR／US／AC／NFR IDs。不得只為綠燈而弱化既有有效測試；需修改時附原因與原驗收語義是否仍有保障。
 - **證據真實性**：自動化、Playwright WebKit、iPhone/iPad 真實 Safari、家長／幼兒試玩是不同證據。缺少實機或家庭試玩時記 `Blocked / Not verified`，不得以模擬器或猜測取代。
@@ -42,7 +42,7 @@
 
 ## 2. M0 — 最小 Technical Spike 與 Architecture Decision Gate
 
-> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-03 已完成；M0-04～M0-07 尚未開始。
+> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-04 已完成；M0-05～M0-07 尚未開始。
 
 ### M0-01 — 可重現的開發與測試骨架
 
@@ -74,6 +74,7 @@
 
 ### M0-04 — 最小版本化進度保存 Adapter
 
+- **狀態**：`Done` — 2026-11-09；自動化證據見[開發與驗證紀錄](development.md)。
 - **前置**：M0-01、M0-02。
 - **交付**：用單一版本化 JSON 保存三組 0～3 計數與已推導的收藏 ID，邊界解析／驗證／正規化、單次提交、記憶體降級及中英儲存警示的最小支援；進度計算不依賴 UI，正式設定畫面可後補。
 - **驗證／Done**：正常 reload、寫入失敗、JSON 損毀、無法使用 localStorage、未知較新 schema 均可測；不假裝失敗寫入已保存，也不以舊版程式覆寫未知新版本；重試回呼不重複加計。
@@ -381,6 +382,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M0-04 — 最小版本化進度保存 Adapter`。** M0-01 工具鏈、M0-02 唯一規則 Domain 與 M0-03 單回合 controller 已完成；M0-04 可與 M0-03 並行的原規劃現在接續執行。待 M0-04 完成後進行依賴它的 M0-05，並可同步進行 M0-06，最後以 M0-07 整理證據及評估架構 Gate。
+**Next：`M0-05 — Learn Flow Spike`。** M0-01～M0-04 已完成；M0-05 可同步進行 M0-06，最後以 M0-07 整理證據及評估架構 Gate。M0-04 僅提供絕對計數的 load/save seam；首次答對的判定與回呼去重仍由 M0-05 的 Learn domain/controller 負責。
 
-**本輪交付邊界**：完成 M0-03 單回合 controller 與適用自動化驗證；**M0-04 之後任務、M0 Architecture Gate、實機或幼兒試玩證據、部署與發布均未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
+**本輪交付邊界**：完成 M0-04 版本化進度保存 Adapter 與自動化驗證；**M0-05 之後任務、M0 Architecture Gate、實機或幼兒試玩證據、部署與發布均未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
