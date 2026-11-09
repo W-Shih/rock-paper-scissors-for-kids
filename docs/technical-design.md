@@ -177,6 +177,8 @@ declare function winningGestureAgainst(opponent: Gesture): Gesture;
 
 ### 5.2 教學題的交易邊界
 
+**M0-05 實作取證**：現有 `round-controller.ts` 保持唯一 RoundState，新增嘗試次數及正確／主動／強制示範來源。首次合格確認在 listener／media 之前同步提交 `progress-store.ts`；錯答會清除暫選，連點確認不消耗下一次機會。`learn-domain.ts` 提供固定題序、完整 3/3/3 混合門檻及簡化雙語因果內容；正常重載重置題序，不保存未完成題。`learn-ui.ts` 以一個 delegated click listener 與狀態 renderer 呈現原型；選卡重新渲染保留焦點，沒有額外雙向狀態／listener 同步。原型預設使用完整靜態圖文示範，以「示範看完了」確認展示完成；正式動畫／語音仍留後續任務。此取證尚不足以通過 M0 架構 Gate。
+
 同一題由一個新的「教學回合」識別；只有**第一次有效「確認答案」事件**且答案正確、此前未提供額外答案提示／揭曉，才可通過 Mastery 合格判定。僅點選卡片不是提交。
 
 - 第一次／第二次確認錯誤後，維持當題可重試狀態，發出不直接洩漏答案的提示；第三次仍錯即關閉提交入口，改用正確手勢走**系統強制示範**。

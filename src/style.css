@@ -19,3 +19,36 @@ main {
 h1 {
   font-size: clamp(1.5rem, 5vw, 2.5rem);
 }
+
+button {
+  min-height: 56px;
+  margin: 0.25rem;
+  padding: 0.65rem 1rem;
+  border: 2px solid #695137;
+  border-radius: 0.65rem;
+  color: inherit;
+  background: #fff;
+  font: inherit;
+}
+
+button[aria-pressed='true'] {
+  border-width: 4px;
+  background: #ffe29b;
+}
+
+button:focus-visible {
+  outline: 3px solid #174a7a;
+  outline-offset: 2px;
+}
+
+figure {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 2px solid #695137;
+  border-radius: 0.65rem;
+  background: #fff;
+}
+
+figure > p {
+  font-size: 1.5rem;
+}

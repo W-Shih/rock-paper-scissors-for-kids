@@ -1,4 +1,6 @@
-import { evaluateRound, gestures, type Gesture, type RoundResult } from './rps-domain';
+import { evaluateRound, gestures, winningGestureAgainst, type Gesture, type RoundResult } from './rps-domain';
+import { createProgressStore } from './progress-store';
+import { chooseLearnOpponent } from './learn-domain';
 
 export type GameMode = 'learn' | 'computer' | 'together';
 export type RoundPhase = 'home' | 'choosing-p1' | 'handoff' | 'choosing-p2' | 'countdown' | 'approach' | 'reveal' | 'complete';
@@ -11,12 +13,15 @@ export type RoundState = Readonly<{
   player1Selection: Gesture | null;
   player2Selection: Gesture | null;
   result: RoundResult | null;
+  learnAttempts: number;
+  learnDemonstration: 'correct' | 'voluntary' | 'forced' | null;
 }>;
 
 export type RoundEvent =
   | { type: 'START'; mode: GameMode; opponentGesture?: Gesture }
   | { type: 'SELECT_GESTURE'; player: 1 | 2; gesture: Gesture }
   | { type: 'CONFIRM_SELECTION'; player: 1 | 2 }
+  | { type: 'SHOW_DEMONSTRATION' }
   | { type: 'MEDIA_FINISHED' | 'MEDIA_FAILED'; roundId: number; phase: RoundPhase }
   | { type: 'REPLAY' | 'HOME' };
 
@@ -25,12 +30,12 @@ export type RoundTransition = Readonly<{ state: RoundState; effects: readonly Ro
 
 export const initialRoundState: RoundState = {
   roundId: 0, mode: null, phase: 'home', presentation: 'animated', opponentGesture: null,
-  player1Selection: null, player2Selection: null, result: null,
+  player1Selection: null, player2Selection: null, result: null, learnAttempts: 0, learnDemonstration: null,
 };
 
 function freshRound(roundId: number, mode: GameMode | null, opponentGesture: Gesture | null): RoundState {
   return { roundId, mode, phase: mode ? 'choosing-p1' : 'home', presentation: 'animated', opponentGesture,
-    player1Selection: null, player2Selection: null, result: null };
+    player1Selection: null, player2Selection: null, result: null, learnAttempts: 0, learnDemonstration: null };
 }
 
 function enterPhase(state: RoundState, phase: RoundPhase): RoundTransition {
@@ -49,7 +54,10 @@ export function reduceRound(state: RoundState, event: RoundEvent, computerGestur
     if ((state.phase !== 'home' && state.phase !== 'complete') || (event.mode === 'learn' && !event.opponentGesture)) return { state, effects: [] };
     return { state: freshRound(state.roundId + 1, event.mode, event.mode === 'learn' ? event.opponentGesture ?? null : null), effects: [] };
   }
-  if (event.type === 'HOME') return { state: freshRound(state.roundId + 1, null, null), effects: [] };
+  if (event.type === 'HOME') {
+    if (state.learnDemonstration !== null && state.phase !== 'complete') return { state, effects: [] };
+    return { state: freshRound(state.roundId + 1, null, null), effects: [] };
+  }
   if (event.type === 'REPLAY') {
     if (state.phase !== 'complete' || !state.mode) return { state, effects: [] };
     return { state: freshRound(state.roundId + 1, state.mode, state.opponentGesture), effects: [] };
@@ -62,6 +70,15 @@ export function reduceRound(state: RoundState, event: RoundEvent, computerGestur
   if (event.type === 'CONFIRM_SELECTION') {
     if (event.player === 1 && state.phase === 'choosing-p1' && state.player1Selection) {
       if (state.mode === 'together') return enterPhase(state, 'handoff');
+      if (state.mode === 'learn' && state.opponentGesture) {
+        const correct = winningGestureAgainst(state.opponentGesture);
+        const attempts = state.learnAttempts + 1;
+        if (state.player1Selection !== correct && attempts < 3) {
+          return { state: { ...state, learnAttempts: attempts, player1Selection: null }, effects: [] };
+        }
+        return beginReveal({ ...state, learnAttempts: attempts,
+          learnDemonstration: state.player1Selection === correct ? 'correct' : 'forced' }, correct, state.opponentGesture);
+      }
       const opponent = state.mode === 'learn' ? state.opponentGesture : computerGesture;
       return opponent ? beginReveal(state, state.player1Selection, opponent) : { state, effects: [] };
     }
@@ -69,6 +86,10 @@ export function reduceRound(state: RoundState, event: RoundEvent, computerGestur
       return beginReveal(state, state.player1Selection, state.player2Selection);
     }
     return { state, effects: [] };
+  }
+  if (event.type === 'SHOW_DEMONSTRATION') {
+    if (state.mode !== 'learn' || state.phase !== 'choosing-p1' || !state.opponentGesture) return { state, effects: [] };
+    return beginReveal({ ...state, learnDemonstration: 'voluntary' }, winningGestureAgainst(state.opponentGesture), state.opponentGesture);
   }
   if (event.type === 'MEDIA_FINISHED' || event.type === 'MEDIA_FAILED') {
     if (event.roundId !== state.roundId || event.phase !== state.phase) return { state, effects: [] };
@@ -98,6 +119,7 @@ export interface RoundControllerOptions {
   clock: RoundClock;
   media: RoundMedia;
   watchdogMs?: number;
+  progressStore?: ReturnType<typeof createProgressStore>;
 }
 
 export function chooseComputerGesture(random: () => number): Gesture {
@@ -112,6 +134,8 @@ export function createRoundController(options: RoundControllerOptions) {
   let cancelMedia: (() => void) | undefined;
   let phaseToken = 0;
   let disposed = false;
+  const progressStore = options.progressStore ?? createProgressStore();
+  let learnQuestionIndex = 0;
   const listeners = new Set<(state: RoundState) => void>();
   const clearEffects = () => {
     phaseToken++;
@@ -127,11 +151,27 @@ export function createRoundController(options: RoundControllerOptions) {
     const computer = event.type === 'CONFIRM_SELECTION' && event.player === 1 && state.phase === 'choosing-p1'
       && state.mode === 'computer' && state.player1Selection
       ? chooseComputerGesture(options.random ?? Math.random) : undefined;
-    const transition = reduceRound(state, event, computer);
+    let nextEvent = event;
+    if ((event.type === 'START' && event.mode === 'learn' && !event.opponentGesture
+        && (state.phase === 'home' || state.phase === 'complete'))
+      || (event.type === 'REPLAY' && state.mode === 'learn' && state.phase === 'complete')) {
+      nextEvent = { type: 'START', mode: 'learn', opponentGesture: chooseLearnOpponent(
+        progressStore.progress.masteryCountsByRuleId, learnQuestionIndex++, options.random ?? Math.random,
+      ) };
+    }
+    const transition = reduceRound(state, nextEvent, computer);
     if (transition.state === state) return state;
     if (transition.state.roundId !== oldId || transition.state.phase !== state.phase
       || transition.state.presentation !== state.presentation) clearEffects();
     state = transition.state;
+    // Commit before notifying the renderer or starting media. Once choosing has
+    // ended, repeated confirmation and media callbacks cannot issue another award.
+    if (state.mode === 'learn' && state.learnDemonstration === 'correct' && state.learnAttempts === 1
+      && state.phase === 'countdown' && transition.effects.length > 0 && state.result?.ruleId !== 'tie' && state.result) {
+      const ruleId = state.result.ruleId;
+      const counts = progressStore.progress.masteryCountsByRuleId;
+      if (counts[ruleId] < 3) progressStore.save({ ...counts, [ruleId]: counts[ruleId] + 1 });
+    }
     const transitionToken = phaseToken;
     listeners.forEach((listener) => listener(state));
     if (disposed || state !== transition.state || transitionToken !== phaseToken) return state;
@@ -151,6 +191,8 @@ export function createRoundController(options: RoundControllerOptions) {
   };
   return {
     getState: () => state,
+    getProgress: () => progressStore.progress,
+    getStorageWarning: () => progressStore.warning,
     dispatch,
     subscribe(listener: (state: RoundState) => void) { listeners.add(listener); return () => listeners.delete(listener); },
     dispose() { disposed = true; clearEffects(); listeners.clear(); },

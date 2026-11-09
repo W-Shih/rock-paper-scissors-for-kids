@@ -1,12 +1,13 @@
+import { masteryRuleIds, type MasteryCounts, type MasteryRuleId } from './rps-domain';
+export { masteryRuleIds } from './rps-domain';
+export type { MasteryCounts, MasteryRuleId } from './rps-domain';
+
 export const progressStorageKey = 'construction-rps:progress';
 export const progressStorageWarning = {
   zh: '學習進度及收藏可能無法保留。',
   en: 'Learning progress and collectibles may not be saved.',
 } as const;
 
-export const masteryRuleIds = ['rock-beats-scissors', 'scissors-beats-paper', 'paper-beats-rock'] as const;
-export type MasteryRuleId = (typeof masteryRuleIds)[number];
-export type MasteryCounts = Readonly<Record<MasteryRuleId, number>>;
 export type Progress = Readonly<{
   masteryCountsByRuleId: MasteryCounts;
   unlockedCollectibleIds: readonly string[];

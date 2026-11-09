@@ -2,7 +2,8 @@
 
 This is the provisional single-package Vite `vanilla-ts` baseline from
 [Technical Design §2.4](technical-design.md#24-工具鏈與版本策略).
-The page is a bilingual placeholder; gameplay and M0-GATE remain pending.
+The page now includes the M0-05 bilingual Learn flow spike; formal gameplay
+presentation and M0-GATE remain pending.
 
 ## Reproduce
 
@@ -161,3 +162,75 @@ Vitest worker due to an `undici` `bind` error; rerunning on the supported Node
 Focused storage tests passed (7/7). No UI, real-device, or child/parent trial
 was part of this adapter task; this does not pass M0-GATE or establish the full
 NFR-AC-07.1 settings/reload acceptance.
+
+## M0-05 validation evidence (2026-11-09)
+
+The production entry now mounts a minimal bilingual Learn spike. The existing
+round reducer/controller owns provisional selection, confirmation, two gentle
+non-answer hints, a third-wrong forced correct demonstration, voluntary
+demonstration, and the first-unhinted-correct progress transaction. Wrong
+confirmation clears selection, so duplicate confirmation cannot consume another
+attempt. Any started demonstration blocks Home and next-question actions until
+its explanation has been shown and acknowledged; Home remains available before
+a demonstration starts. No wrong answer becomes a
+competitive loss.
+
+`learn-domain.ts` supplies fixed scissors/paper/rock opponents until all three
+mastery counts reach 3, then uses injected random mixed questions. The controller
+commits the absolute count and derived unlock synchronously before notifying
+subscribers or starting media. Counts cap at 3; repeated confirmation, media
+notifications, and stale round callbacks do not reaward progress. The existing
+version-1 storage format is unchanged. `MasteryRuleId`, its exhaustive ordered
+ID list, and `MasteryCounts` live in the pure RPS domain module. The storage
+adapter re-exports these symbols for compatibility, while Learn domain depends
+directly on the pure domain module.
+
+`learn-ui.ts` uses one delegated click listener and one state-driven renderer.
+Selecting a card updates pressed state and retains focus; there is no separate
+DOM-owned game state. Progress labels are neutral rule numbers, so neither
+visible progress nor ARIA reveals the answer before confirmation. The spike has
+no animation/audio assets: its media adapter immediately enters the existing
+static-fallback boundary. That screen presents both correct gestures, the
+bilingual winning rule and causal explanation, plus the friendly restored
+ending. An explicit "Demonstration finished" button acknowledges this content
+before completion. Stalled/failing injected media uses the same fallback.
+
+Tests use the authorized controller and DOM public seams with injected
+time/media/random/storage boundaries. They are proportional behavior tests;
+this evidence does not claim a formal red-green TDD cycle. Existing tests were
+preserved. The original placeholder factory test still verifies its default
+baseline; an optional status supports the Learn entry. The E2E baseline test
+was updated because the production page now exposes the authorized spike,
+while retaining bilingual-heading and runtime-error checks.
+
+Review follow-up moved mastery definitions to the pure domain module and
+closed the voluntary-demonstration Home path: delayed media cannot return Home
+before the complete static causal explanation is acknowledged. The controller
+rejects Home for every in-progress demonstration, and the UI only offers it
+before a demonstration starts or after completion.
+
+Validation used the supported Node 24.22.1 / npm 10.9.2 runtime documented above:
+
+| Command | Result |
+| --- | --- |
+| `npm run typecheck` | Exit 0 after controller and UI slices; build also includes typecheck |
+| `npm test -- src/learn-controller.test.ts src/round-controller.test.ts` | Exit 0; 2 files, 19 tests passed |
+| `npm test -- src/learn-ui.test.ts` | Exit 0; 1 file, 7 tests passed |
+| `npm test` | Exit 0; 7 files, 49 tests passed |
+| `npm run lint` | Exit 0; zero warnings |
+| `npm run build` | Exit 0; 12 modules; CSS 0.61 kB, JS 13.37 kB |
+| `npm run test:e2e` | Exit 0; 6/6 passed across Chromium and WebKit |
+
+Controller/DOM coverage includes second-/third-attempt success, all three
+correct rules, voluntary/forced demonstrations, non-answer hints, no fourth
+attempt, failure fallback waiting for acknowledgement, stale notifications,
+duplicate events, synchronous 2→3 unlock/reload, capped counts, and the 3/3/3
+mixed gate. A delayed voluntary demonstration verifies that Home remains
+unavailable through static fallback and becomes available after explicit
+acknowledgement. Browser tests verify the production entry, repeated reload before
+demonstration completion with one capped unlock, and the forced static
+demonstration before Home/next become available.
+
+No real iPhone/iPad Safari, Android touch, parent/child trial, formal animation,
+speech/audio, final Garage UI or release acceptance was performed. These
+results complete the M0-05 spike only; M0-06 onward and M0-GATE remain pending.
