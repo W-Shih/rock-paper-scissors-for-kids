@@ -1,8 +1,9 @@
 # Technical Design — 工地猜拳大賽（Construction Site RPS Adventure）
 
-> 文件版本：**TD v0.10**（Vanilla-first 暫定選型；M0 Technical Spike 後決策）
-> 更新日期：2026-11-06
-> 狀態：**Provisional Vanilla TypeScript + Vite; M0 decision gate pending; prototype not started**
+> 文件版本：**TD v0.11**（2026-11-09；M0-07 原型證據與 M0-GATE 架構選型決策）
+> 更新日期：2026-11-09
+> 狀態：**M0-GATE passed for technical selection; Vanilla TypeScript + Vite confirmed. M0 prototypes complete; M1 product implementation may begin.**
+> 選型證據：[M0-07 architecture decision](m0-07-evidence.md)；M0 Gate 不代表 Safari 真機、完整產品流程或 MVP 驗收。
 > 產品版本：MVP v1.0 — Browser-First / Touch-First
 > 產品依據：[PRD](../PRD.md)（Why / What、範圍及優先級）
 > 跨階段約束：[Constitution](../constitution.md)（Principles / Constraints）
@@ -11,7 +12,7 @@
 > 核心問題：**How should the solution be engineered?**（Architecture / Engineering Decisions）
 > 核心職責：**選擇並論證適合現有需求的技術、架構、模組邊界、資料與媒體方案，記錄取捨、風險與驗證方式；不新增產品承諾，不取代實作計畫。**
 
-**閱讀與決策規則**：本文的「選定」表示可作為 MVP 開發的**工程預設選擇**；TD-02／04／07 目前是暫定選擇，須通過 M0 Gate 才可正式確認，不表示已通過原型、Safari 真機或幼兒試玩。純技術選擇在不改變 Spec 行為／PRD 範圍且符合 Constitution 時可依證據調整；若提案會改變可觀察的遊戲行為或優先級，須先依 [AGENTS.md](../AGENTS.md) 的變更控制流程處理。本文中的 TypeScript 範例是設計草案，不是要求逐字實作的 API 契約。
+**閱讀與決策規則**：本文的「選定」表示可作為 MVP 開發的**工程預設選擇**。TD-02／04／07 已依 M0 Gate 證據確認（見 [M0-07 架構決策證據](m0-07-evidence.md)）；這不代表正式產品流程、Safari 真機或幼兒試玩已驗收。純技術選擇在不改變 Spec 行為／PRD 範圍且符合 Constitution 時可依證據調整；若提案會改變可觀察的遊戲行為或優先級，須先依 [AGENTS.md](../AGENTS.md) 的變更控制流程處理。本文中的 TypeScript 範例是設計草案，不是要求逐字實作的 API 契約。
 
 ## 1. 設計目標、範圍與取捨準則
 
@@ -33,16 +34,16 @@
 
 ## 2. 技術探索、方案比較與選型決策
 
-### 2.1 前端架構：Vanilla TypeScript + Vite（暫定）
+### 2.1 前端架構：Vanilla TypeScript + Vite（M0 confirmed）
 
 | 候選 | 優勢／合適場景 | 對本 MVP 的代價或限制 | 結論 |
 |---|---|---|---|
-| **React + TypeScript + Vite** | 宣告式 UI、元件生命週期與複雜畫面共享狀態較容易管理 | 增加 Framework Runtime；動畫、音效需管理 refs／effects 與 cleanup | **備選；若 M0 顯示 Vanilla UI 維護成本過高再評估** |
+| **React + TypeScript + Vite** | 宣告式 UI、元件生命週期與複雜畫面共享狀態較容易管理 | 增加 Framework Runtime；動畫、音效需管理 refs／effects 與 cleanup | **條件式備選；僅在後續有明確 UI 架構失敗證據時重評估** |
 | Svelte + TypeScript + Vite | 輕量、直接的互動與動畫開發，適合小型 SPA | 換框架不會消除教學規則、媒體控制與驗證的核心複雜度 | 可行備選，現階段無足夠收益支持替換 |
-| **Vanilla TypeScript + Vite** | 依賴少、直接控制 DOM / SVG / WAAPI、純邏輯可測試 | 需自行管理 DOM 更新、事件清理；若開始重造 UI 框架則應重新評估 | **暫定首選；M0 後確認** |
+| **Vanilla TypeScript + Vite** | 依賴少、直接控制 DOM / SVG / WAAPI、純邏輯可測試 | 需自行管理 DOM 更新、事件清理；若開始重造 UI 框架則應重新評估 | **Confirmed for MVP; M0 evidence supports the state/render and lifecycle boundaries** |
 | Next.js／其他偏全端框架 | 適合多路由、SSR、內容服務或服務端需求 | MVP 無 SSR、API、登入或 SEO 驅動的多頁內容 | **不引入**；不是因框架本身不可用 |
 
-**暫定選型理由**：這是一款畫面有限、以狀態機與 SVG 動畫為核心的教學 SPA；Vanilla TypeScript 搭配 Vite 可降低起步依賴並直接操作 DOM／WAAPI。兩個代表性流程須先在 M0 Technical Spike 中驗證：若 UI 狀態同步、事件生命週期或重複渲染開始需要自製框架，才試作小型 React 對照原型。不以框架偏好代替證據，正式選型由 M0 Architecture Decision Gate 記錄（§12）。
+**選型理由與證據**：畫面有限、以狀態與 SVG 媒體為核心的教學 SPA，使用 Vanilla TypeScript 搭配 Vite 可降低依賴並直接操作 DOM／WAAPI。M0 Learn 與 Together 代表性原型顯示，單一 controller state 可驅動畫面、listener／訂閱／媒體清理邊界清楚，且測試可經 controller、DOM 與媒體 public seams 驗證；沒有出現需要 React 對照的未解同步或生命週期問題。逐項證據見 [M0-07 架構決策證據](m0-07-evidence.md)。若後續 UI 出現具體且難以簡單修復的架構成本，才依 §12.3 重評估。
 
 ### 2.2 2D 呈現技術：從 SVG + CSS / WAAPI 開始
 
@@ -60,12 +61,12 @@
 | ID | 決策（MVP） | 不採用／取捨 | 狀態 |
 |---|---|---|---|
 | TD-01 | **無後端、單一靜態 SPA、HTTPS 託管** | 不建 API、SSR、資料庫、登入或 PWA | Selected |
-| TD-02 | **Vanilla TypeScript（strict）+ Vite** 為暫定首選；React 為備選 | M0 後依 UI 複雜度、測試與維護證據確認 | **Provisional — M0 Gate** |
+| TD-02 | **Vanilla TypeScript（strict）+ Vite** | React 作為有具體 UI 架構失敗證據時的條件式備選 | **Confirmed Vanilla — M0 Gate (2026-11-09)** |
 | TD-03 | **SVG + CSS / WAAPI**，規則結果先決定、動畫僅呈現 | 暫不引入 Phaser、PixiJS 或通用動畫編輯器 | Selected; validate on device |
-| TD-04 | **純函式 Domain + Framework-independent Reducer / Controller + Screen Renderer** | 不自行打造通用 UI 框架；保留可取消的媒體效果 | **Provisional — M0 Gate** |
+| TD-04 | **純函式 Domain + Framework-independent Reducer / Controller + Screen Renderer** | 不自行打造通用 UI 框架；保留可取消的媒體效果 | **Confirmed Vanilla — M0 Gate (2026-11-09)** |
 | TD-05 | **key-based 中英文字 + 合法預錄短音檔** | 不以裝置 TTS 的聲線／離線可用性作正式內容保證 | Selected; audio assets pending |
 | TD-06 | **單一版本化 JSON + localStorage**；寫入失敗退回記憶體 | 暫不引入 IndexedDB、雲端同步、備份服務 | Selected |
-| TD-07 | **Vitest + DOM Testing Library + Playwright**；另做 Safari 實機驗收 | 不需 React 亦可測試 UI；WebKit 不等於實機 Safari | **Provisional — M0 Gate** |
+| TD-07 | **Vitest + DOM Testing Library + Playwright**；另做 Safari 實機驗收 | 不需 React 亦可測試 UI；WebKit 不等於實機 Safari | **Confirmed for M0/MVP automation — M0 Gate (2026-11-09)** |
 | TD-08 | **npm lockfile + TypeScript typecheck + ESLint + production build** | 不提前引入 monorepo、複雜 CI 或強制 coverage 百分比 | Selected |
 | TD-09 | **模組內 simple data maps** 管理三手勢、三角色、規則與素材 | 不做 CMS、plugin、通用場景／任務配置系統 | Selected |
 | TD-10 | **單一路由的畫面狀態切換** | 不安裝 Router、重度 CSS 框架與遠端 UI 服務 | Selected |
@@ -179,7 +180,7 @@ declare function winningGestureAgainst(opponent: Gesture): Gesture;
 
 ### 5.2 教學題的交易邊界
 
-**M0-05 實作取證**：現有 `round-controller.ts` 保持唯一 RoundState，新增嘗試次數及正確／主動／強制示範來源。首次合格確認在 listener／media 之前同步提交 `progress-store.ts`；錯答會清除暫選，連點確認不消耗下一次機會。`learn-domain.ts` 提供固定題序、完整 3/3/3 混合門檻及簡化雙語因果內容；正常重載重置題序，不保存未完成題。`learn-ui.ts` 以一個 delegated click listener 與狀態 renderer 呈現原型；選卡重新渲染保留焦點，沒有額外雙向狀態／listener 同步。原型預設使用完整靜態圖文示範，以「示範看完了」確認展示完成；正式動畫／語音仍留後續任務。此取證尚不足以通過 M0 架構 Gate。
+**M0-05 歷史實作取證（單獨不足以通過 M0-GATE）**：現有 `round-controller.ts` 保持唯一 RoundState，新增嘗試次數及正確／主動／強制示範來源。首次合格確認在 listener／media 之前同步提交 `progress-store.ts`；錯答會清除暫選，連點確認不消耗下一次機會。`learn-domain.ts` 提供固定題序、完整 3/3/3 混合門檻及簡化雙語因果內容；正常重載重置題序，不保存未完成題。`learn-ui.ts` 以一個 delegated click listener 與狀態 renderer 呈現原型；選卡重新渲染保留焦點，沒有額外雙向狀態／listener 同步。原型預設使用完整靜態圖文示範，以「示範看完了」確認展示完成；正式動畫／語音仍留後續任務。此原型是 M0-07 架構評估的一項證據，不單獨等同 M0-GATE 通過。
 
 同一題由一個新的「教學回合」識別；只有**第一次有效「確認答案」事件**且答案正確、此前未提供額外答案提示／揭曉，才可通過 Mastery 合格判定。僅點選卡片不是提交。
 
@@ -195,7 +196,7 @@ declare function winningGestureAgainst(opponent: Gesture): Gesture;
 
 ### 6.1 控制器選擇
 
-暫採 **Vanilla TypeScript 的純 reducer／controller + 明確 Screen Renderer**；使用者事件經 dispatch 驅動合法轉移，控制器與渲染函式分離。單一目前有效的回合狀態包含 `roundId`、`mode`、`phase`、已確認的手勢、必要的教學嘗試資訊及已判定結果。畫面只按狀態渲染，副作用由受控的 effects 執行。
+採用 **Vanilla TypeScript 的純 reducer／controller + 明確 Screen Renderer**（M0-07 確認；TD-04）。使用者事件經 dispatch 驅動合法轉移，控制器與渲染函式分離。單一目前有效的回合狀態包含 `roundId`、`mode`、`phase`、已確認的手勢、必要的教學嘗試資訊及已判定結果。畫面只按狀態渲染，副作用由受控的 effects 執行。
 
 **建議的相位集合**（可依程式合理合併，不須一個相位對應一個 class）：
 
@@ -413,7 +414,7 @@ type ProgressV1 = {
 
 ### 12.3 M0 Architecture Decision Gate — Vanilla vs React
 
-**決策時點**：M0 Technical Spike 完成後、M1 正式 Vertical Slice 開始前，**正式確認**要沿用 Vanilla TypeScript + Vite，或根據證據重新評估 React。M0 使用 placeholder 素材與最小必要 UI，不必完成 M2 的全部遊戲內容。M0 Gate 是技術選型的工程關卡，不是取代 Spec 的產品驗收。
+**決策時點與結果**：M0 Technical Spike 完成後、M1 正式 Vertical Slice 開始前，使用原型證據確認 Vanilla TypeScript + Vite。**結果（2026-11-09）：M0-GATE passed for the technical selection; M0-08 React comparison was not needed.** M0 使用 placeholder 素材與最小必要 UI，不必完成 M2 的全部遊戲內容。M0 Gate 是技術選型的工程關卡，不是取代 Spec 的產品驗收。決策證據見 [M0-07 架構決策證據](m0-07-evidence.md)。
 
 **需要的兩條代表性原型**：
 
@@ -430,7 +431,7 @@ type ProgressV1 = {
 | 動畫與保密 | SVG/WAAPI 可獨立取消，雙人秘密選拳不因重新渲染／返回洩漏 | 重新渲染破壞動畫節點或跨畫面狀態使保密難以維持 |
 | 實際維護成本 | 模組責任清楚，增加簡單畫面不需要大幅修改 Controller | 開始重造元件生命週期／DOM diff／binding；修改一處影響多畫面 |
 
-**Gate 產物**：在此 TD 的 TD-02／TD-04／TD-07 更新 **Confirmed Vanilla** 或 **Reopened / React selected**，附測試結果、觀察到的 UI／媒體／狀態問題、替代方案的理由，以及 [Implementation Plan](implementation-plan.md) 內的相應驗證紀錄。
+**Gate 產物（已完成）**：TD-02／TD-04 更新為 **Confirmed Vanilla**，TD-07 更新為 **Confirmed for M0/MVP automation**；測試結果、觀察到的 UI／媒體／狀態問題與限制記錄於 [M0-07 架構決策證據](m0-07-evidence.md) 及 [Implementation Plan](implementation-plan.md)。後續若有具體 UI 架構失敗，可重新開啟決策並依證據考慮 React。
 
 **決策規則**：若 Vanilla 可讀、易測、事件清理可控，則確認 Vanilla 並進入 M1。若存在具體失敗訊號，先定位是否為一般實作缺陷；只有確實與 UI 架構相關時才製作**針對該問題的最小 React 對照原型**，比較複雜度／測試／維護後決策，**不要求同時完整開發兩份遊戲**。如果無法決定，M1 主體實作暫不開始，先明確記錄待驗證問題及下一步；不可把「Spike 通過」誤說成 Safari 實機／MVP 已驗收。
 
@@ -445,4 +446,4 @@ type ProgressV1 = {
 - [MDN — Using the Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API)
 - [MDN — prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion)
 
-**本輪結論**：暫以 **Vanilla TypeScript + Vite**、SVG/CSS/WAAPI、純 reducer／controller、localStorage、Vitest／DOM Testing Library／Playwright 進入 **M0 Technical Spike**。React 是有條件的備選，不預先排除、也不預先建置 React 對照版。正式選型須在 M0 Gate 由實際原型與測試證據確認；所有核心產品行為仍由 Spec 定義，M1 Safari 實機驗證與效能定標另行執行。
+**目前結論（2026-11-09）**：M0-GATE 已依兩條代表性原型與自動化證據確認 **Vanilla TypeScript + Vite**、純 Domain／reducer-controller／screen renderer，以及 Vitest／DOM Testing Library／Playwright（TD-02／04／07）。M0-08 React 對照未觸發；React 保留為出現明確 UI 架構失敗證據時的條件式重評方案。核心產品行為仍由 Spec 定義，M1 Safari 實機驗證、正式產品流程與效能定標另行完成；詳細證據及限制見 [M0-07 架構決策證據](m0-07-evidence.md)。
