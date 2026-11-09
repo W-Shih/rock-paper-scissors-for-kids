@@ -1,7 +1,7 @@
 # MVP Implementation Plan — Construction Site RPS Adventure
 
 > **計畫版本**：v2.0（2026-11-06；依 Spec v1.6、Technical Design v0.10 拆解）
-> **計畫狀態**：M0 execution started；M0-01～M0-02 Done（2026-11-08），M0-03 之後尚未開始，M0 Architecture Gate 尚未通過
+> **計畫狀態**：M0 execution started；M0-01～M0-03 Done（2026-11-08），M0-04 之後尚未開始，M0 Architecture Gate 尚未通過
 > **交付版本**：MVP v1.0，Browser-First / Touch-First
 > **核心問題**：**How will we deliver and verify it?**（Tasks / Execution / Verification）
 > **核心職責**：**依已核准的規格與技術設計，拆成可獨立實作、測試和驗收的工作項目，定義依賴、里程碑、完成條件及驗證證據；不自行新增產品承諾、改寫行為或降低驗收標準。**
@@ -42,7 +42,7 @@
 
 ## 2. M0 — 最小 Technical Spike 與 Architecture Decision Gate
 
-> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01 已完成；其餘 M0 任務為 `Not started`。
+> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-03 已完成；M0-04～M0-07 尚未開始。
 
 ### M0-01 — 可重現的開發與測試骨架
 
@@ -64,9 +64,12 @@
 
 ### M0-03 — 單回合 reducer／controller、事件及取消語義
 
+- **狀態**：`Done` — 2026-11-08。
 - **前置**：M0-01、M0-02。
 - **交付**：獨立於 DOM 的合法模式／相位轉移、`roundId` / generation token、只在確認時鎖定選擇、效果邊界與可注入亂數／時鐘／媒體通知；保持最小而可測，不造通用狀態機 Framework。
+- **實作／證據**：[src/round-controller.ts](../src/round-controller.ts) 提供純 reducer 與小型 controller：選擇／確認分離、Learn／Computer／Together 的基本單回合路徑、roundId 隔離、注入 computer random／clock／media、取消媒體與 watchdog 靜態降級。對照事件及 timer 測試見 [src/round-controller.test.ts](../src/round-controller.test.ts)。Learn 題目提示／三次答題／Mastery 不在本任務範圍，留 M0-05。
 - **驗證／Done**：選卡不等於提交、連點只確認一次、非法相位事件無效、回首頁／重開後舊 timer／動畫 callback 被忽略、媒體回報不重算結果；使用 fake clock／effects 單測。
+- **驗證結果**：Node 24.22.1／npm 10.9.2，`npm run typecheck`、`npm run lint`、`npm test`（4 files／27 tests）、`npm run build` 全部通過；PR 審查補上同步 listener 離開／dispose、媒體啟動／取消例外及明確靜態 reveal 的回歸測試。靜態內容需 renderer 回報已呈現，不以媒體失敗當作展示完成。完整記錄見 [開發與驗證紀錄](development.md)。未跑 E2E：本任務沒有 DOM／UI 變更；未作真機／幼兒驗收。
 - **追蹤**：FR-02／10；AC-01.3、AC-06.1～06.3；NFR-AC-04.3；TD §6。
 
 ### M0-04 — 最小版本化進度保存 Adapter
@@ -378,6 +381,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M0-03 — 單回合 reducer／controller、事件及取消語義`。** M0-01 工具鏈與 M0-02 唯一規則 Domain 已完成；M0-03 與 M0-04 可並行。待必要前置就緒，再以 M0-05／06 收集代表性 UI 證據，最後進行 M0-07 選型 Gate。
+**Next：`M0-04 — 最小版本化進度保存 Adapter`。** M0-01 工具鏈、M0-02 唯一規則 Domain 與 M0-03 單回合 controller 已完成；M0-04 可與 M0-03 並行的原規劃現在接續執行。待 M0-04 完成後進行依賴它的 M0-05，並可同步進行 M0-06，最後以 M0-07 整理證據及評估架構 Gate。
 
-**本輪交付邊界**：完成 M0-02 Domain 與適用自動化驗證；**未完成 M0-03 之後任務、未取得實機或幼兒試玩證據、未部署或發布產品**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
+**本輪交付邊界**：完成 M0-03 單回合 controller 與適用自動化驗證；**M0-04 之後任務、M0 Architecture Gate、實機或幼兒試玩證據、部署與發布均未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
