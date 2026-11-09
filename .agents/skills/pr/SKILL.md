@@ -16,7 +16,7 @@ For this repository, write PR titles and explanatory prose primarily in Traditio
 ```markdown
 ## Summary
 
-<diagram, diff-sketch, or tree>
+<renderable diagram; optional supporting sketch or tree>
 
 ## Evidence
 
@@ -40,7 +40,7 @@ Skip all preambles and keep prose brief. Use the user's domain language from `GL
 
 ### Required visual
 
-Every PR Summary **must include at least one renderable diagram** that explains the actual change, such as a Mermaid flow, sequence, or relationship diagram. A text tree, pseudocode, or diff sketch may supplement the diagram, but does not satisfy this requirement by itself. Choose the smallest diagram that makes the changed behavior, relationships, or boundaries clear; do not add diagrams unrelated to the diff.
+Every PR Summary **must include at least one renderable diagram** that explains the actual change, such as a Mermaid flow, sequence, or relationship diagram. Prefer Mermaid when suitable. A text tree, pseudocode, or diff sketch may supplement the diagram, but does not satisfy this requirement by itself. Choose the smallest diagram that makes the changed behavior, relationships, or boundaries clear; do not add diagrams unrelated to the diff.
 
 ### Summary
 
@@ -159,7 +159,7 @@ function expandSkill(command: string): string {
 
 Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
 
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+Use these supporting formats to supplement the required diagram when helpful. Use your judgement and don't overwhelm the user.
 
 ### Evidence
 
