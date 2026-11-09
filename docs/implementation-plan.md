@@ -83,6 +83,7 @@
 ### M0-05 — Learn Flow Spike（UI 同步、正確性與持續性）
 
 - **前置**：M0-02、M0-03、M0-04。
+- **非阻擋追蹤（待處理）**：接入 Learn domain 時，讓 `MasteryRuleId` 衍生自 `Exclude<RuleId, 'tie'>`，並以編譯期約束檢查掌握規則清單與既有 Domain 的型別一致性；以 `npm run typecheck` 驗證。來源：[PR #9 Standards 審查建議](https://github.com/W-Shih/rock-paper-scissors-for-kids/pull/9#issuecomment-6742798914)。此項為維護性改善，不影響 M0-04 已完成狀態，也不新增產品驗收條件。
 - **交付**：placeholder 手勢／SVG、指定對手先顯示、可重選／確認、前兩次錯答各給非答案提示、第三次錯答揭曉／禁止第四次提交／**必須完成正確因果示範**（媒體故障時完整靜態示範），以及家長主動示範路徑。首次無提示正確在提交時才可加計。
 - **驗證／Done**：Vitest + DOM 測試三次錯答、第二／第三次改對、首次正確、主動／強制示範、失敗降級、同題事件重送、2→3 解鎖及 reload；觀察 DOM 是否多處同步／重複 listener。原型測試不等於全部 Learn P0 最終驗收。
 - **追蹤**：FR-03／11；AC-07.1～07.4、AC-11.1／11.3；NFR-AC-04.2～04.3。
