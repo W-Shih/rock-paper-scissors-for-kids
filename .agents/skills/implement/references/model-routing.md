@@ -6,13 +6,22 @@ effort; it owns task scoping, coordination, evidence assessment and delivery.
 
 ## Implementers
 
-Delegate implementation and confirmed review fixes to a fresh-context subagent
-with `model = "gpt-6-luna"` and `reasoning_effort = "medium"`.
-For cross-module state changes, difficult diagnosis or substantial refactoring,
-select `gpt-6.1-sol` / `medium` before dispatch. If an implementer repeatedly
-fails to resolve the same confirmed defect, reassess requirements and test
-evidence, then hand the bounded task to a fresh Sol / medium implementer rather
-than repeating the same attempt.
+Before dispatch, the main agent evaluates the task and selects a suitable
+configuration directly. Keep `gpt-6-luna` / `medium` as the default. Choose
+Luna / `high` when the scope and plan are clear but local logic, state
+combinations or edge cases need more reasoning. Choose `gpt-6.1-sol` / `medium`
+when understanding cross-module implicit contracts, diagnosing unknown causes
+or integrating interacting behavior requires broader understanding. File count
+and cross-file edits alone do not justify an upgrade; select a configuration
+from the reasoning the task needs, without a mandatory escalation ladder.
+
+Implementers follow the approved plan, resolve local implementation details,
+and run verification. If the plan has a contradiction or gap, or a product
+choice is needed, report evidence to the main agent, pause the affected portion,
+and continue other authorized work. Model escalation does not grant permission
+to redesign the plan. If a fix attempt fails repeatedly, reassess the plan and
+evidence; the main agent chooses the appropriate next dispatch rather than
+starting an automatic retry loop.
 
 Pass the approved scope, applicable AGENTS instructions, spec / ticket pointers,
 workspace or worktree, file ownership and expected verification. The implementer
