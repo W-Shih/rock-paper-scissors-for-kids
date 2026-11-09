@@ -78,6 +78,7 @@
 - **Vite vanilla-ts 模板、npm**：單一 package、lockfile 固定相依版本，保留標準開發、測試、打包命令。
 - **Node.js**：初始 scaffold 使用與當時 Vite／Vitest 相容的 Node LTS 並寫入 `engines`（可搭配 `.nvmrc`）。截至本文檢視的官方文件，Vitest 要求 Node ≥22.12，且 Vite 亦支援 Node 22.12+；開始實作時再確認並鎖定，**不在尚無 package.json 時虛構已安裝版本**。
 - **品質基線**：`typecheck`、`lint`、`test`、`build` 可重複執行；E2E 與真機驗證分開記錄。開發中以問題驅動加入依賴，不為 CI／架構展示增加無用套件。
+- **完整自動檢查**：本機與 CI 共用 `npm run check`（型別、lint、單元／DOM、production build、E2E）；`test:e2e` 自行先 build，避免驗證舊 bundle。ESLint 使用 TypeScript project service 執行 `no-floating-promises` 與 `no-misused-promises`，涵蓋來源、測試及 TypeScript 設定，保護非同步媒體與事件邊界。
 - **持續整合**：以 [GitHub Actions CI](../.github/workflows/ci.yml) 在 PR、`main` push 或手動觸發時，使用 Ubuntu 24.04、`.nvmrc` 的 Node 及 `packageManager` 的 npm 執行乾淨安裝、四項品質指令與 Chromium／WebKit E2E。單一 job、唯讀 repository 權限、取消同分支過期執行，瀏覽器失敗報告／trace 保存 7 天；不部署、不設定 coverage 百分比。CI 成功不能取代 Safari 真機或親子驗收。
 
 ## 3. 部署拓樸、信任邊界與執行環境

@@ -9,6 +9,8 @@
 
 ## 1. 規劃基線、範圍與執行規則
 
+- **自動化品質補強（2026-11-09）**：本機與 CI 共用 `npm run check`，E2E 先 build；啟用兩條型別感知 Promise lint 規則；main 必要 CI 檢查已設置。驗證結果及 WebKit 崩潰調查限制見 [開發紀錄](development.md#first-layer-quality-gate-2026-11-09)。此項為工程基線補強，不推進 M0-GATE 或產品驗收狀態。
+
 - **P0 必須交付**：Spec FR-01～FR-12、US-01～US-12 與適用的 P0 NFR-AC。**FR-13／US-13 為 P1**，獨立評估、獨立記錄 Go / Defer，不是 M0～M2 或 P0 Release 的隱藏阻擋條件。
 - **不在此計畫**：PRD §5.3 的 IDEA-01～07（更多場景／車輛擴充、鏡頭辨識、三人猜拳等）、原生 App、PWA、後端、帳號、分析追蹤；不得為未承諾的想法預建 framework、plugin、service 或通用 DSL。
 - **暫定技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 **尚未 confirmed**，只允許 M0 最小 Spike；通過 Architecture Gate 後才進入 M1 正式 UI。React 是有條件備選，**不**同時完整開發兩套遊戲。

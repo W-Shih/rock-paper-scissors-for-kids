@@ -4,6 +4,8 @@ export default defineConfig({
   testDir: './e2e',
   forbidOnly: true,
   workers: 1,
+  globalTimeout: 600_000,
+  reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : [['list']],
   use: { baseURL: 'http://127.0.0.1:4173', trace: 'retain-on-failure' },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
