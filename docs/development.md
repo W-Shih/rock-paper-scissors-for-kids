@@ -14,6 +14,13 @@ the [Node release schedule](https://github.com/nodejs/Release) and
 [Vite](https://vite.dev/guide/) / [Vitest](https://vitest.dev/guide/) requirements
 were checked when selecting this baseline.
 
+The host's current default shell uses Node **24.22.2** and npm/npx **11.13.0**.
+Ordinary commands now work in the Codex sandbox without a PATH override or a
+direct npm CLI path; see the sandbox repair record below. This host verification
+does not change `.nvmrc`, `engines` or `packageManager`: Node 24.22.2 satisfies
+the recorded Node engine, but npm 11.13.0 is outside the project's npm 10 range.
+Use the declared toolchain when reproducing the CI baseline.
+
 ```sh
 npm ci
 npx playwright install chromium webkit
@@ -34,15 +41,96 @@ only `e2e/`, once in Chromium and once in WebKit. TypeScript strict and ESLint
 cover source, tests and TypeScript configuration. No framework choice is
 confirmed by these smoke tests; nine-pair rule validation belongs to M0-02.
 
+## npm/npx sandbox repair (2026-11-09)
+
+**Current status:** fixed on this Windows host. New sandbox shell invocations
+resolve the default `npm` and `npx` normally, without temporary environment
+changes or execution outside the sandbox. The dated validation sections below
+retain the commands and versions actually used at the time; their direct-CLI /
+PATH workarounds are historical evidence, not current setup instructions.
+
+### Diagnosis and repair scope
+
+The default PowerShell launchers in `D:/_apps/Program Files/nodejs` selected
+`C:/Users/a3459/AppData/Roaming/npm/node_modules/npm` through npm's configured
+global prefix. PowerShell `Test-Path` reported the CLI as present, but sandboxed
+Node returned `EPERM` from native `stat`, `readFileSync` and `realpath` calls;
+launching the CLI then surfaced as `MODULE_NOT_FOUND`. The same global npm
+worked in the actual-user context. Directly launching the Node installation's
+bundled CLI and using the `.cmd` launchers also worked. These probes established
+an access mismatch, rather than a missing global npm package.
+
+The repair added only these Allow entries for the local `CodexSandboxUsers`
+group. Paths are specific to this host; they are not repository prerequisites.
+
+| Path under `C:/Users/a3459/AppData/Roaming/npm` | Added rights | Inheritance |
+| --- | --- | --- |
+| npm root itself | Traverse, ReadAttributes, ReadPermissions, Synchronize | None; this directory only |
+| `node_modules` | Traverse, ReadAttributes, ReadPermissions, Synchronize | None; this directory only |
+| `node_modules/npm` | ReadAndExecute, Synchronize | ContainerInherit + ObjectInherit; npm package and its descendants |
+
+Existing permissions were retained. No permission was added to the user profile
+root, other global packages, or other user directories; no write permission was
+granted. Native probes after repair confirmed npm's `package.json` was readable,
+while listing the parent `node_modules` and opening that file for read/write
+still returned `EPERM` in the sandbox.
+
+Original ACLs for the three directories were saved before modification to
+`C:/Users/a3459/AppData/Local/Temp/codex-npm-acl-5fbaf0736bc84776944702f26739e3c4.json`.
+This is a local recovery artifact, not a committed file or durable backup;
+preserve it elsewhere before clearing temporary files if rollback is needed.
+The successful repair used `.NET FileSystemAclExtensions.GetAccessControl`
+with `AccessControlSections.Access`, `FileSystemAccessRule` / `AddAccessRule`,
+and `FileSystemAclExtensions.SetAccessControl` to modify only the DACL.
+An earlier `Set-Acl` attempt failed with `SeSecurityPrivilege`; npm/npx still
+failed afterward, so the repair proceeded through the DACL-only API. No
+audit-policy change or privilege grant was made.
+
+For rollback, in the actual-user context, load each saved path/SDDL, apply its
+Access section to that directory's ACL, and persist it with the same DACL-only
+API. Preserve owner, group and audit entries, and do not recursively reset the
+profile's ACLs. Reverting repository files does not revert this host setting.
+After reinstalling or relocating global npm, recheck the actual paths and
+native access before considering any new narrowly scoped repair.
+
+An attempted PowerShell launcher edit was denied by the Node installation's
+Windows ACL; the launcher remained unchanged (verified against its backup).
+The final repair changed no launcher, PATH, PowerShell profile, Node/npm
+package contents, project dependency or lockfile.
+
+### Verification in fresh sandbox shells
+
+No PATH overrides or direct CLI paths were used for these checks. Windows x64;
+Node 24.22.2; npm/npx 11.13.0. This is host-repair evidence, distinct from the
+project's declared Node 24.22.1 / npm 10.9.2 baseline.
+
+| Command / probe | Result |
+| --- | --- |
+| `node --version` | Exit 0; v24.22.2 |
+| `npm --version` / `npx --version` | Exit 0; both 11.13.0; repeated in a separate sandbox shell |
+| `npx --no-install tsc --version` | Exit 0; Version 6.0.2; no package download requested |
+| `npm run typecheck` | Exit 0 |
+| `npm run lint` | Exit 0; zero warnings |
+| `npm test` | Exit 0; 9 files, 68 tests passed |
+| `npm run build` | Exit 0; 15 modules built |
+| Native npm-package read / write and parent-listing probes | Read succeeded; write and parent listing remained denied |
+| Actual-user `npm --version` / `npx --version` | Exit 0; both remained 11.13.0 |
+
+No clean install, package download or browser E2E was rerun as part of this
+sandbox repair. Browser-process sandbox restrictions, real Safari acceptance
+and parent/child trials are separate from npm startup and are not established
+by these results.
+
 ## Validation evidence (2026-11-08)
 
 Windows x64; Node 24.22.1; npm 10.9.2. Exact package versions are recorded in
 `package.json` / `package-lock.json` (Vite 8.3.6, TypeScript 6.0.2,
 Vitest 5.1.0, Playwright 1.65.0, ESLint 10.14.0).
 
-The host's default npm launcher points to a missing installation, so validation
-invokes the installed npm CLI with the selected Node on PATH. This is an
-environment workaround, not a repository dependency. Initial installation ran
+At the time, the host's default npm launcher reported a missing CLI, so validation
+invoked the installed npm CLI with the selected Node on PATH. This historical
+environment workaround was not a repository dependency and is no longer needed
+on the repaired host described above. Initial installation ran
 out of host memory; a subsequent clean `npm ci` replaced incomplete binaries.
 The retry used `NODE_OPTIONS="--max-old-space-size=512 --max-semi-space-size=1"`
 and npm `--no-audit --no-fund --maxsockets=1` to bound installation resources.
@@ -58,7 +146,7 @@ and npm `--no-audit --no-fund --maxsockets=1` to bound installation resources.
 | `npm run test:e2e` | Exit 0; Chromium + WebKit, 2/2 passed; no page runtime errors |
 
 The four quality commands were run together again after clean installation.
-For the launcher workaround, each `npm` command above was executed as
+For that historical launcher workaround, each `npm` command above was executed as
 `node "D:/_apps/Program Files/nodejs/node_modules/npm/bin/npm-cli.js"`,
 with `C:/Users/a3459/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin`
 prepended to PATH; browser installation used
@@ -89,7 +177,7 @@ media start/cancellation exceptions, replay callbacks, and direct reducer
 round/phase-token rejection.
 
 Validation used Node 24.22.1 and npm 10.9.2 via the runtime paths documented in
-the M0-01 section. The system npm shim still points to a missing installation;
+the M0-01 section. At that time, the system npm shim still reported a missing CLI;
 the supported runtime invocation succeeded:
 
 | Command | Result |
