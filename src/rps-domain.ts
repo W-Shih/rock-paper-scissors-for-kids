@@ -8,6 +8,15 @@ export type RuleId =
   | 'paper-beats-rock'
   | 'tie';
 
+export type MasteryRuleId = Exclude<RuleId, 'tie'>;
+export const masteryRuleIds = ['rock-beats-scissors', 'scissors-beats-paper', 'paper-beats-rock'] as const satisfies readonly MasteryRuleId[];
+// Keep the ordered list exhaustive when a winning rule is added.
+const masteryRuleCoverage: Record<MasteryRuleId, true> = {
+  'rock-beats-scissors': true, 'scissors-beats-paper': true, 'paper-beats-rock': true,
+} satisfies Record<(typeof masteryRuleIds)[number], true>;
+void masteryRuleCoverage;
+export type MasteryCounts = Readonly<Record<MasteryRuleId, number>>;
+
 export type RoundResult = Readonly<{
   player1Gesture: Gesture;
   player2Gesture: Gesture;
