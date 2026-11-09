@@ -52,3 +52,16 @@ figure {
 figure > p {
   font-size: 1.5rem;
 }
+
+.together-track {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  background: #ead8b8;
+  border-radius: 1rem;
+}
+
+.countdown-beat {
+  font-size: 3rem;
+  text-align: center;
+}

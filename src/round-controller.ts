@@ -178,7 +178,8 @@ export function createRoundController(options: RoundControllerOptions) {
     for (const effect of transition.effects) {
       const token = phaseToken;
       const notify = (mediaEvent: RoundEvent) => { if (token === phaseToken) dispatch(mediaEvent); };
-      watchdog = options.clock.schedule(() => notify({ type: 'MEDIA_FAILED', roundId: effect.roundId, phase: effect.phase }), options.watchdogMs ?? 5000);
+      // Handoff waits for the next player, rather than a timed media sequence.
+      if (effect.phase !== 'handoff') watchdog = options.clock.schedule(() => notify({ type: 'MEDIA_FAILED', roundId: effect.roundId, phase: effect.phase }), options.watchdogMs ?? 5000);
       try {
         const cancel = options.media.play(effect, notify);
         if (token === phaseToken) cancelMedia = cancel || undefined;
