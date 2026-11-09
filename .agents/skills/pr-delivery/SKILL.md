@@ -15,6 +15,12 @@ pushing the branch, creating or updating the PR, posting results, and merging
 eligible low-risk changes. Respect narrower instructions such as "do not merge".
 Requests to explain, create or edit this skill do not invoke delivery.
 
+For implementation or review fixes performed during delivery, read
+[model routing](../implement/references/model-routing.md) and delegate to a fresh
+implementer with its explicit model / effort selection. Keep the main agent's
+current settings for coordination and delivery; `code-review` owns reviewer
+dispatch. Existing completed implementation does not need to be repeated.
+
 ## 1. Establish the delivery scope
 
 Read [AGENTS.md](../../../AGENTS.md), including applicable nested instructions.
@@ -65,7 +71,7 @@ standards files do not justify inventing a new standard or stopping delivery.
 Separate concrete defects from optional suggestions and unresolved hypotheses.
 
 Have an Implementer fix confirmed, in-scope defects, preserving independent
-Reviewer judgment. Use a fresh implementer subagent when delegation is available;
+Reviewer judgment. Dispatch the implementer under the model routing policy above;
 custom agent configuration is not required. Check proposed findings against their
 evidence before changing code. Record reasons when a finding is not applicable.
 Product decisions and specification conflicts follow the escalation gate below.
