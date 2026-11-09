@@ -68,3 +68,25 @@ prepended to PATH; browser installation used
 These checks concern
 the engineering baseline for NFR-08 only; they do not establish NFR-AC-08.1–08.3,
 real iPhone/iPad Safari acceptance, child/parent trials or MVP release readiness.
+
+## M0-02 validation evidence (2026-11-08)
+
+The M0-02 domain implementation keeps gesture evaluation independent from the
+fixed playable-character content. `src/rps-domain.test.ts` covers all nine
+gesture pairs, both players' perspectives, all three winning-gesture queries,
+and the three fixed character mappings.
+
+Validation used the Node 24.22.1 runtime and npm 10.9.2 CLI noted above:
+
+| Command | Result |
+| --- | --- |
+| `npm run typecheck` | Exit 0 |
+| `npm run lint` | Exit 0; zero warnings |
+| `npm test` | Exit 0; 3 files, 15 tests passed |
+| `npm run build` | Exit 0; production bundle built |
+
+The default shell's Node 22 / npm launcher did not meet the recorded toolchain;
+the checks were rerun successfully with the documented runtime paths. Browser
+E2E was not rerun because this domain-only change adds no UI behavior. This
+evidence does not establish real-device, child/parent trial, or release
+acceptance.

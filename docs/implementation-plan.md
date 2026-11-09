@@ -1,7 +1,7 @@
 # MVP Implementation Plan — Construction Site RPS Adventure
 
 > **計畫版本**：v2.0（2026-11-06；依 Spec v1.6、Technical Design v0.10 拆解）
-> **計畫狀態**：M0 execution started；M0-01 Done（2026-11-08），其餘任務尚未開始，M0 Architecture Gate 尚未通過
+> **計畫狀態**：M0 execution started；M0-01～M0-02 Done（2026-11-08），M0-03 之後尚未開始，M0 Architecture Gate 尚未通過
 > **交付版本**：MVP v1.0，Browser-First / Touch-First
 > **核心問題**：**How will we deliver and verify it?**（Tasks / Execution / Verification）
 > **核心職責**：**依已核准的規格與技術設計，拆成可獨立實作、測試和驗收的工作項目，定義依賴、里程碑、完成條件及驗證證據；不自行新增產品承諾、改寫行為或降低驗收標準。**
@@ -13,7 +13,7 @@
 - **不在此計畫**：PRD §5.3 的 IDEA-01～07（更多場景／車輛擴充、鏡頭辨識、三人猜拳等）、原生 App、PWA、後端、帳號、分析追蹤；不得為未承諾的想法預建 framework、plugin、service 或通用 DSL。
 - **暫定技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 **尚未 confirmed**，只允許 M0 最小 Spike；通過 Architecture Gate 後才進入 M1 正式 UI。React 是有條件備選，**不**同時完整開發兩套遊戲。
 - **任務切分**：每個 `Mx-yy` 是一個可獨立審查／交付的垂直或工程工作項，列有「前置」「交付」「驗證／Done」「追蹤」。同里程碑內無依賴的任務可並行；不要以文件列出的先後順序虛構必要依賴。
-- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01 已完成工具鏈與 smoke tests，證據見該任務；其餘任務仍為 `Not started`。未宣稱已部署或完成裝置／親子試玩。
+- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01 工具鏈與 M0-02 規則 Domain 已完成，證據見任務及[開發與驗證紀錄](development.md)；其餘任務仍為 `Not started`。未宣稱已部署或完成裝置／親子試玩。
 - **每項任務的 Done**：有可檢閱的程式碼或資產／文件變更、與變更風險相稱的新增測試（含失敗／邊界路徑）、適用的 typecheck／lint／test／build 結果、對應 AC／NFR-AC 的驗證證據及未解問題。僅寫程式、只有 happy path、或測試未執行，不能標記為 `Done`。
 - **變更控制**：產品範圍先由 PRD 決策，行為與驗收先修 Spec，純工程取捨記 Technical Design，再更新本計畫；保留 FR／US／AC／NFR IDs。不得只為綠燈而弱化既有有效測試；需修改時附原因與原驗收語義是否仍有保障。
 - **證據真實性**：自動化、Playwright WebKit、iPhone/iPad 真實 Safari、家長／幼兒試玩是不同證據。缺少實機或家庭試玩時記 `Blocked / Not verified`，不得以模擬器或猜測取代。
@@ -55,9 +55,11 @@
 
 ### M0-02 — 唯一猜拳規則與手勢／角色映射
 
+- **狀態**：`Done` — 2026-11-08。
 - **前置**：M0-01。
 - **交付**：`Gesture`、`RuleId`、`RoundResult`、`evaluateRound`、`winningGestureAgainst` 的純 Domain；三手勢與三固定主角的內容映射獨立於判定。
-- **驗證／Done**：9/9 配對、三種勝利關係、三個平手、雙方視角與勝利手勢查詢全有單測；換角色／文案不改判定。不得以動畫速度或 UI 車種計算勝負。
+- **實作／證據**：[src/rps-domain.ts](../src/rps-domain.ts) 將規則計算和固定角色雙語內容分離；[src/rps-domain.test.ts](../src/rps-domain.test.ts) 覆蓋 9/9 配對、反轉雙方視角、三種勝利手勢查詢及三個固定角色映射。角色資料不參與判定函式。
+- **驗證／Done**：於記錄環境執行 typecheck、lint、Vitest（15/15）及 production build，結果見[開發與驗證紀錄](development.md)。未涉及 UI／動畫或真機驗收。
 - **追蹤**：FR-01／02；AC-01.2、AC-03.3；NFR-AC-08.1～08.3。
 
 ### M0-03 — 單回合 reducer／controller、事件及取消語義
@@ -376,6 +378,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M0-02 — 唯一猜拳規則與手勢／角色映射`。** M0-01 工具鏈與 smoke tests 已完成；接著完成 M0-02，之後 M0-03 與 M0-04 可並行。待必要前置就緒，再以 M0-05／06 收集代表性 UI 證據，最後進行 M0-07 選型 Gate。
+**Next：`M0-03 — 單回合 reducer／controller、事件及取消語義`。** M0-01 工具鏈與 M0-02 唯一規則 Domain 已完成；M0-03 與 M0-04 可並行。待必要前置就緒，再以 M0-05／06 收集代表性 UI 證據，最後進行 M0-07 選型 Gate。
 
-**本輪交付邊界**：僅完成 M0-01 開發與測試骨架及適用自動化驗證；**未完成其他任務、未取得實機或幼兒試玩證據、未部署或發布產品**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
+**本輪交付邊界**：完成 M0-02 Domain 與適用自動化驗證；**未完成 M0-03 之後任務、未取得實機或幼兒試玩證據、未部署或發布產品**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
