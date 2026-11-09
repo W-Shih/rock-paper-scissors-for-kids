@@ -10,6 +10,10 @@ Two-axis review of a committed diff or the user's uncommitted work:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings. Start every sub-agent with a fresh context window.
 
+## Language
+
+For this repository, write review finding titles and explanatory prose (including rationale, recommendations, and summaries) primarily in Traditional Chinese (zh-TW), unless the user explicitly requests another language. Keep template labels such as Standards and Spec in English. Technical terms such as controller, reducer, and callback may remain in English, including in diagrams. Preserve code identifiers, commands, paths, requirement IDs, official names, and original quotations; prioritize natural, readable explanations over translating every term. Include this language instruction in each reviewer sub-agent's prompt and follow it when aggregating the reports.
+
 The issue tracker should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
 
 ## Process
