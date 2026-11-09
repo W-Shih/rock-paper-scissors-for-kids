@@ -1,7 +1,7 @@
 # MVP Implementation Plan — Construction Site RPS Adventure
 
-> **計畫版本**：v2.0（2026-11-06；依 Spec v1.6、Technical Design v0.10 拆解）
-> **計畫狀態**：M0 execution started；M0-01～M0-06 Done（M0-06：2026-11-09），M0-07 之後尚未開始，M0 Architecture Gate 尚未通過
+> **計畫版本**：v2.0（2026-11-06；原始拆解依 Spec v1.6、Technical Design v0.10；狀態依 Technical Design v0.11）
+> **計畫狀態**：M0-GATE passed（2026-11-09）；M0-01～M0-07 Done、M0-08 Not needed；允許進入 M1，正式產品／真機驗收仍待後續里程碑
 > **交付版本**：MVP v1.0，Browser-First / Touch-First
 > **核心問題**：**How will we deliver and verify it?**（Tasks / Execution / Verification）
 > **核心職責**：**依已核准的規格與技術設計，拆成可獨立實作、測試和驗收的工作項目，定義依賴、里程碑、完成條件及驗證證據；不自行新增產品承諾、改寫行為或降低驗收標準。**
@@ -13,9 +13,9 @@
 
 - **P0 必須交付**：Spec FR-01～FR-12、US-01～US-12 與適用的 P0 NFR-AC。**FR-13／US-13 為 P1**，獨立評估、獨立記錄 Go / Defer，不是 M0～M2 或 P0 Release 的隱藏阻擋條件。
 - **不在此計畫**：PRD §5.3 的 IDEA-01～07（更多場景／車輛擴充、鏡頭辨識、三人猜拳等）、原生 App、PWA、後端、帳號、分析追蹤；不得為未承諾的想法預建 framework、plugin、service 或通用 DSL。
-- **暫定技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 **尚未 confirmed**，只允許 M0 最小 Spike；通過 Architecture Gate 後才進入 M1 正式 UI。React 是有條件備選，**不**同時完整開發兩套遊戲。
+- **技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 已依 M0 證據確認；如後續出現明確 UI 架構成本，React 仍是條件式備選，**不**同時完整開發兩套遊戲。
 - **任務切分**：每個 `Mx-yy` 是一個可獨立審查／交付的垂直或工程工作項，列有「前置」「交付」「驗證／Done」「追蹤」。同里程碑內無依賴的任務可並行；不要以文件列出的先後順序虛構必要依賴。
-- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01～M0-06 已完成，證據見各任務及[開發與驗證紀錄](development.md)；M0-07 之後尚未開始。未宣稱已部署或完成裝置／親子試玩。
+- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01～M0-07 已完成，選型 Gate 已通過；M0-08 經 M0-07 證據判為 `Not needed`。證據見各任務、[M0-07 架構決策證據](m0-07-evidence.md)及[開發與驗證紀錄](development.md)。未宣稱已部署或完成裝置／親子試玩。
 - **每項任務的 Done**：有可檢閱的程式碼或資產／文件變更、與變更風險相稱的新增測試（含失敗／邊界路徑）、適用的 typecheck／lint／test／build 結果、對應 AC／NFR-AC 的驗證證據及未解問題。僅寫程式、只有 happy path、或測試未執行，不能標記為 `Done`。
 - **變更控制**：產品範圍先由 PRD 決策，行為與驗收先修 Spec，純工程取捨記 Technical Design，再更新本計畫；保留 FR／US／AC／NFR IDs。不得只為綠燈而弱化既有有效測試；需修改時附原因與原驗收語義是否仍有保障。
 - **證據真實性**：自動化、Playwright WebKit、iPhone/iPad 真實 Safari、家長／幼兒試玩是不同證據。缺少實機或家庭試玩時記 `Blocked / Not verified`，不得以模擬器或猜測取代。
@@ -24,7 +24,7 @@
 
 | Milestone | 交付目的 | 主要任務 | 前置 Gate | Exit / 可前進條件 |
 |---|---|---|---|---|
-| **M0 — Technical Spike** | 規則／狀態骨架、Learn + Together 代表性流程、架構取證 | M0-01～M0-07；必要時 M0-08 | 文件基線已確認 | **M0-GATE** 有測試與維護性證據，TD-02／04／07 正式確認；否則停留 M0 |
+| **M0 — Technical Spike** | 規則／狀態骨架、Learn + Together 代表性流程、架構取證 | M0-01～M0-07；必要時 M0-08 | 文件基線已確認 | **Passed 2026-11-09**；Vanilla 與測試工具選型有證據，M0-08 Not needed |
 | **M1 — Playable Vertical Slice** | 可玩的工地對決切片、首條因果、一次修復、Safari 初測 | M1-01～M1-08 | M0-GATE passed | 核心路徑可端到端重現，Safari 初次量測與觀察已記錄，已知缺口留待 M2／M3 |
 | **M2 — Full Core Flows** | 完整 Learn／Computer／Together、三勝一平、情緒與回合安全 | M2-01～M2-07 | M1 Exit | 模式及規則 P0 行為的正／反向自動化與人工檢查有證據；不把 M3 未完成項目標為通過 |
 | **M3 — Release Readiness** | 正式雙語與音訊、收藏存檔、跨裝置、隱私、效能與親子驗收 | M3-01～M3-09（M3-06 為 P1 條件任務） | M2 Exit | Spec §10 的 **P0** 驗收與 NFR 證據齊備、阻斷問題清除並完成 Release Gate |
@@ -44,7 +44,7 @@
 
 ## 2. M0 — 最小 Technical Spike 與 Architecture Decision Gate
 
-> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-06 已完成；M0-07 尚未開始。
+> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-07 已完成；M0-GATE 已通過，M0-08 不需要。
 
 ### M0-01 — 可重現的開發與測試骨架
 
@@ -108,19 +108,22 @@
 
 ### M0-07 — 原型證據整理與架構選型評估
 
+- **狀態**：`Done` — 2026-11-09；M0-GATE 技術選型部分通過。
 - **前置**：M0-05、M0-06。
-- **交付**：列出原型檔案／commit、成功與失敗測試輸出、Controller/Renderer 的狀態更新責任、listener cleanup／WAAPI cancellation、測試脆弱性與已知風險；依 [TD §12.3](technical-design.md) 逐項比較客觀證據。
-- **驗證／Done**：如 Vanilla 清楚、可測且無不合理 UI 同步成本，更新 TD-02／TD-04／TD-07 為確認選型並附證據；若有具體架構問題，先排除一般 Bug，再記錄須由 M0-08 比較的假設；無充分證據時 Gate 保持 Pending，**不**先開始 M1。
+- **交付／證據**：[M0-07 架構決策證據](m0-07-evidence.md) 列出 M0-05／06 commit 與關鍵檔案、實際通過的測試、開發期間重現且已修復的失敗案例、Controller／Renderer 責任、listener／訂閱／timer／WAAPI 清理邊界，以及測試脆弱性與未驗證範圍；按 [TD §12.3](technical-design.md) 五項面向逐條評估。
+- **決策**：原型呈現單一 state-driven renderer、明確 cleanup 與可測 public seams；沒有需 React 對照的未解架構失敗。TD-02 = `Confirmed Vanilla`、TD-04 = `Confirmed Vanilla`、TD-07 = `Confirmed for M0/MVP automation`；M0-08 `Not needed`；M0-GATE 允許進入 M1。
+- **驗證結果**：Coordinator 在 Node 24.22.2／npm 11.13.0（npm 超出 repo 宣告版本範圍）執行 `npm run check`，typecheck、lint、68 unit/DOM tests、production build 通過，但 sandbox E2E preview 以 `EACCES` 停止；另在支援權限下執行 E2E，Chromium／WebKit 共 12/12 通過。單次 `npm run check` 未整體 exit 0；逐項結果與已知 WebKit 歷史不穩定見[M0-07 證據](m0-07-evidence.md)。M0-05／06 歷史驗證另依文件所列 Node 24.22.1／npm 10.9.2。
 - **追蹤**：TD §2.3／§12.3；NFR-08；M0-GATE。
 
 ### M0-08 — 條件式 React 最小對照 Spike（非預設）
 
+- **狀態**：`Not needed` — M0-07 未找到明確且未解的 Vanilla UI 架構成本；若後續 M1/M2 出現具體、可重現且難以簡單修復的架構問題，可重新評估。
 - **前置**：M0-07 找到明確、可重現且難以用簡單修復解決的 Vanilla UI 架構成本。
 - **交付**：僅重做造成問題的最小代表畫面與其測試，與現有 Vanilla 比較 DOM 同步、動畫取消、測試穩定度與維護成本；不建立完整第二款遊戲。
 - **驗證／Done**：附兩方案同條件的可重現資料及選型結論，回寫 TD-02／04／07；若未觸發則標記 `Not needed`，而非偽裝成測試已通過。
 - **追蹤**：TD §12.3；工程決策，非新增 FR。
 
-**M0-GATE — 進入 M1 的硬性關卡**：M0-01～M0-07 的必要證據已審閱；有條件時完成 M0-08；正式選定單一前端方案、同步 TD-02／04／07 與本計畫狀態。**不以原型通過宣稱 Safari 真機驗收、完整 Learn/Together、正式音效或 MVP 完成。** 未完成則維持 M0 並記錄 blocker／下一個最小實驗。
+**M0-GATE — 進入 M1 的硬性關卡**：**Passed 2026-11-09 for the technical selection.** M0-01～M0-07 證據已審閱；M0-08 條件未觸發；Vanilla TypeScript strict + Vite、純 Domain／framework-independent Reducer-Controller／Screen Renderer、Vitest + DOM Testing Library + Playwright 已依證據正式選定。**不以原型通過宣稱 Safari 真機驗收、完整 Learn/Together、正式音效或 MVP 完成。** M1 可開始，其自身驗收條件仍依後續任務完成。
 
 
 ## 3. M1 — First Playable Vertical Slice
@@ -402,6 +405,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M0-07 — 原型證據整理與架構選型評估`。** M0-01～M0-06 已完成；接續整理兩條最小 Spike 的證據，評估架構 Gate。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-01 — 導覽骨架、模式選擇與狀態入口`。** M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
-**本輪交付邊界**：完成 M0-06 Together + Animation 原型與自動化驗證；**M0-07 之後任務、M0 Architecture Gate、正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布均未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
+**目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
