@@ -2,7 +2,7 @@
 
 This is the provisional single-package Vite `vanilla-ts` baseline from
 [Technical Design §2.4](technical-design.md#24-工具鏈與版本策略).
-The page now includes the M0-05 bilingual Learn flow spike; formal gameplay
+The page now includes the M0-05 bilingual Learn and M0-06 Together flow spikes; formal gameplay
 presentation and M0-GATE remain pending.
 
 ## Reproduce
@@ -234,3 +234,67 @@ demonstration before Home/next become available.
 No real iPhone/iPad Safari, Android touch, parent/child trial, formal animation,
 speech/audio, final Garage UI or release acceptance was performed. These
 results complete the M0-05 spike only; M0-06 onward and M0-GATE remain pending.
+
+## M0-06 validation evidence (2026-11-09)
+
+The minimal launcher (`prototype-app.ts`) opens the existing Learn spike or the
+Together spike. This is a technical-spike entry rather than the full M1-01
+product navigation. Together reuses the M0-03 round controller and pure rule
+engine. Its renderer removes P1 controls and pressed-state markup at handoff,
+places focus on a neutral heading, and starts P2 with no selected card. Handoff
+is explicitly acknowledged by P2; the controller no longer schedules a media
+watchdog for this human-paced boundary. Other phase watchdogs are unchanged.
+
+After both confirmations, the media adapter shows 3, 2, 1, then moves two
+identical anonymous SVG vehicles using WAAPI. No gesture or character is passed
+to the pre-reveal adapter. Both actual choices are rendered together in the
+central reveal, with the bilingual rule and a simplified causal/restored-ending
+explanation reused from Learn. This spike does not implement formal character
+art, three full causal animations, emotional animation, audio or FR-13 controls.
+Animated reveal completes after a short display; a media failure instead shows
+the complete static result and waits for explicit "Finished watching" before
+completion. Neither path changes the locked outcome or saves mastery.
+
+The adapter owns cancellable timers and animations. Completion/rejection
+handlers are attached immediately to every started animation, including when a
+later animation setup throws. The existing controller token invalidates stale
+notifications. The launcher disposes and blanks its current view on every
+pagehide, including bfcache; pageshow and popstate reopen a fresh home. Disposing
+a view removes its delegated click listener and controller subscription. No
+secret selection is persisted.
+
+Tests use the agreed public controller/media protocol, rendered DOM/ARIA and
+Playwright seams; browser time, storage and WAAPI are controlled at boundaries.
+Red-green evidence includes missing Together UI, the 30-second handoff timeout
+regression, countdown-to-static fallback, lifecycle mounting, and a partial-WAAPI
+setup test that first reproduced an unhandled rejection and then passed after
+immediate rejection handling. Existing tests and their assertions were retained.
+
+Validation used Windows x64, Node 24.22.1 and the runtime invocation documented
+above. Commands below directly invoke the installed tools after prepending the
+supported Node runtime to PATH; they correspond to the package scripts.
+
+| Command | Result |
+| --- | --- |
+| `node node_modules/typescript/bin/tsc --noEmit` | Exit 0 after implementation slices and final changes |
+| `node node_modules/vitest/vitest.mjs run src/together-ui.test.ts src/prototype-app.test.ts src/round-controller.test.ts` | Exit 0; 3 files, 31 tests passed |
+| `node node_modules/vitest/vitest.mjs run` | Exit 0; 9 files, 68 tests passed |
+| `node node_modules/eslint/bin/eslint.js . --max-warnings 0` | Exit 0; zero warnings |
+| `node node_modules/vite/bin/vite.js build` | Exit 0; 15 modules, CSS 0.75 kB, JS 19.17 kB |
+| `node node_modules/@playwright/test/cli.js test e2e/together.spec.ts` | Exit 0; 6/6 passed across Chromium and WebKit |
+| `node node_modules/@playwright/test/cli.js test` | Exit 0; 12/12 passed across Chromium and WebKit, including unchanged Learn flows |
+
+DOM coverage exercises all nine actual pairs, P1 DOM/ARIA/focus erasure,
+unselected P2, rapid confirmations, detached controls, replay and stale
+notifications, missing/rejected/stalled/partially-started WAAPI, cancellation
+by Home/disposal, timer cleanup and unchanged mastery/no save. Browser coverage
+checks private handoff/countdown/neutral SVG approach, simultaneous actual-pair
+reveal and replay, cancel/reload/back, static failure completion and no page
+runtime errors. Browser runs require the actual-user execution context with its
+installed browser binaries: the first sandbox launch attempts failed immediately
+and the runner was cancelled; rerunning in that context passed. This did not
+require dependency, source or Playwright configuration changes.
+
+No real iPhone/iPad Safari, Android touch, child/parent trial, formal media,
+performance threshold or release acceptance was performed. M0-07 evidence
+assessment, M0-GATE and all later product tasks remain pending.

@@ -1,7 +1,7 @@
 # MVP Implementation Plan — Construction Site RPS Adventure
 
 > **計畫版本**：v2.0（2026-11-06；依 Spec v1.6、Technical Design v0.10 拆解）
-> **計畫狀態**：M0 execution started；M0-01～M0-05 Done（M0-05：2026-11-09），M0-06 之後尚未開始，M0 Architecture Gate 尚未通過
+> **計畫狀態**：M0 execution started；M0-01～M0-06 Done（M0-06：2026-11-09），M0-07 之後尚未開始，M0 Architecture Gate 尚未通過
 > **交付版本**：MVP v1.0，Browser-First / Touch-First
 > **核心問題**：**How will we deliver and verify it?**（Tasks / Execution / Verification）
 > **核心職責**：**依已核准的規格與技術設計，拆成可獨立實作、測試和驗收的工作項目，定義依賴、里程碑、完成條件及驗證證據；不自行新增產品承諾、改寫行為或降低驗收標準。**
@@ -13,7 +13,7 @@
 - **不在此計畫**：PRD §5.3 的 IDEA-01～07（更多場景／車輛擴充、鏡頭辨識、三人猜拳等）、原生 App、PWA、後端、帳號、分析追蹤；不得為未承諾的想法預建 framework、plugin、service 或通用 DSL。
 - **暫定技術基線**：Vanilla TypeScript strict + Vite；純 Domain／Reducer-Controller／Screen Renderer；SVG + CSS / WAAPI；版本化 localStorage；Vitest、DOM Testing Library、Playwright。TD-02／TD-04／TD-07 **尚未 confirmed**，只允許 M0 最小 Spike；通過 Architecture Gate 後才進入 M1 正式 UI。React 是有條件備選，**不**同時完整開發兩套遊戲。
 - **任務切分**：每個 `Mx-yy` 是一個可獨立審查／交付的垂直或工程工作項，列有「前置」「交付」「驗證／Done」「追蹤」。同里程碑內無依賴的任務可並行；不要以文件列出的先後順序虛構必要依賴。
-- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01～M0-05 已完成，證據見各任務及[開發與驗證紀錄](development.md)；M0-06 之後尚未開始。未宣稱已部署或完成裝置／親子試玩。
+- **狀態**：`Not started`／`In progress`／`Blocked`／`Done`。M0-01～M0-06 已完成，證據見各任務及[開發與驗證紀錄](development.md)；M0-07 之後尚未開始。未宣稱已部署或完成裝置／親子試玩。
 - **每項任務的 Done**：有可檢閱的程式碼或資產／文件變更、與變更風險相稱的新增測試（含失敗／邊界路徑）、適用的 typecheck／lint／test／build 結果、對應 AC／NFR-AC 的驗證證據及未解問題。僅寫程式、只有 happy path、或測試未執行，不能標記為 `Done`。
 - **變更控制**：產品範圍先由 PRD 決策，行為與驗收先修 Spec，純工程取捨記 Technical Design，再更新本計畫；保留 FR／US／AC／NFR IDs。不得只為綠燈而弱化既有有效測試；需修改時附原因與原驗收語義是否仍有保障。
 - **證據真實性**：自動化、Playwright WebKit、iPhone/iPad 真實 Safari、家長／幼兒試玩是不同證據。缺少實機或家庭試玩時記 `Blocked / Not verified`，不得以模擬器或猜測取代。
@@ -42,7 +42,7 @@
 
 ## 2. M0 — 最小 Technical Spike 與 Architecture Decision Gate
 
-> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-05 已完成；M0-06～M0-07 尚未開始。
+> **M0 目的**：驗證選型風險，而非將三種模式／正式音效／收藏 UI 提早全部完成。M0 原型能重用的可靠程式可延伸至 M1；不為 Spike 重造與正式實作不同的第二份 Domain。M0-01～M0-06 已完成；M0-07 尚未開始。
 
 ### M0-01 — 可重現的開發與測試骨架
 
@@ -92,6 +92,8 @@
 
 ### M0-06 — Together + Animation Spike（保密與非同步安全）
 
+- **狀態**：`Done`（2026-11-09；僅原型與自動化證據，非 M0-GATE／Together 最終驗收）。
+- **實作／證據**：[together-ui.ts](../src/together-ui.ts) 重用既有 controller／Domain，單一 delegated listener 與 state renderer 管理 P1／中性交接／P2／共同揭曉；[together-media.ts](../src/together-media.ts) 管理倒數、匿名 SVG／WAAPI 進場、可取消媒體及靜態失敗退路；[prototype-app.ts](../src/prototype-app.ts) 僅提供原型入口及 pagehide（含 bfcache）／pageshow／popstate 安全重開。交接等待玩家主動確認，不設媒體 watchdog 自動交接。九種實際配對、DOM／ARIA／焦點保密、取消／reload／返回、重玩／舊通知、WAAPI reject／部分啟動失敗／timeout／dispose 與不增加 Mastery 均有測試。完整命令與限制見[開發紀錄](development.md#m0-06-validation-evidence-2026-11-09)。
 - **前置**：M0-02、M0-03（共享 M0-01 工具鏈）。
 - **交付**：P1 選拳確認 → 無法辨識的交接頁 → P2 確認 → 簡單倒數、SVG／WAAPI 移動與中央共同揭曉；動畫／訂閱可取消，媒體失敗可顯示靜態正確結果。
 - **驗證／Done**：DOM／ARIA 不殘留可辨識的 P1 選項；返回、取消、reload 不洩漏；連點、重玩、動畫取消／拒絕／逾時、舊回合 callback 不重複結算；以 DOM 測試及至少一條 Playwright 代表流程留證，觀察重渲染與事件生命週期。
@@ -385,6 +387,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M0-06 — Together + Animation Spike`。** M0-01～M0-05 已完成；接續 M0-06，最後以 M0-07 整理證據及評估架構 Gate。M0-05 已接入 M0-04 的絕對計數 load/save seam，首次答對的判定與回呼去重由 Learn controller 負責。
+**Next：`M0-07 — 原型證據整理與架構選型評估`。** M0-01～M0-06 已完成；接續整理兩條最小 Spike 的證據，評估架構 Gate。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
-**本輪交付邊界**：完成 M0-05 Learn 流程原型與自動化驗證；**M0-06 之後任務、M0 Architecture Gate、正式 Learn UI／美術／音訊、實機或幼兒試玩證據、部署與發布均未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
+**本輪交付邊界**：完成 M0-06 Together + Animation 原型與自動化驗證；**M0-07 之後任務、M0 Architecture Gate、正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布均未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。

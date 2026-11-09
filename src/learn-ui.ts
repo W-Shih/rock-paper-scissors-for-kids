@@ -10,7 +10,7 @@ function gestureLabel(gesture: Gesture): string {
   return `${character.symbol} ${bilingual(character.nameZh, character.nameEn)}`;
 }
 
-export function createLearnApp(options: Partial<RoundControllerOptions> = {}) {
+export function createLearnApp(options: Partial<RoundControllerOptions> = {}, onTogether?: () => void) {
   const controller = createRoundController({
     clock: { schedule: (callback, delay) => window.setTimeout(callback, delay), cancel: (handle) => window.clearTimeout(handle as number) },
     // There are no animation assets in this spike. Exercise the same static
@@ -47,6 +47,7 @@ export function createLearnApp(options: Partial<RoundControllerOptions> = {}) {
     const progress = controller.getProgress();
     if (state.phase === 'home') {
       button(bilingual('學習', 'Learn'), 'start');
+      if (onTogether) button(bilingual('親子原型', 'Together spike'), 'together');
     } else {
       const opponent = state.opponentGesture!;
       paragraph(bilingual(`什麼能贏${playableCharacters[opponent].nameZh}？`, `What beats ${playableCharacters[opponent].nameEn.toLowerCase()}?`));
@@ -111,6 +112,7 @@ export function createLearnApp(options: Partial<RoundControllerOptions> = {}) {
     const control = target.closest('button');
     if (!control || !screen.contains(control) || control.disabled) return;
     const action = control.dataset.action;
+    if (action === 'together') { onTogether?.(); return; }
     const events: Record<string, RoundEvent> = {
       start: { type: 'START', mode: 'learn' }, confirm: { type: 'CONFIRM_SELECTION', player: 1 },
       demo: { type: 'SHOW_DEMONSTRATION' }, next: { type: 'REPLAY' }, home: { type: 'HOME' },
