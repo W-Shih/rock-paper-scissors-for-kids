@@ -126,3 +126,38 @@ the checks were rerun successfully with the documented runtime paths. Browser
 E2E was not rerun because this domain-only change adds no UI behavior. This
 evidence does not establish real-device, child/parent trial, or release
 acceptance.
+
+## M0-04 validation evidence (2026-11-09)
+
+`src/progress-store.ts` provides a version-1 JSON storage adapter for the three
+mastery counts. It derives the three collectible IDs from counts on load and
+save, performs a single `setItem` per save, retains the greatest observed count
+to prevent accidental regression, and switches to in-memory state with a
+bilingual warning after unavailable/corrupt storage or a write failure. A
+newer schema remains untouched and cannot be overwritten. The adapter accepts
+absolute counts; Learn eligibility and stale-callback deduplication remain the
+responsibility of M0-05. Speech/audio preferences and reset UI are outside this
+minimal M0-04 adapter and remain for later settings work.
+
+`src/progress-store.test.ts` covers reload, boundary normalization and trusted
+unlock derivation, corrupt JSON, unavailable storage, write failure, newer
+schema protection, one-record writes, idempotent absolute-count retries, and
+non-regression. Invalid or inconsistent stored values retain valid sibling
+counts, are normalized conservatively, and surface the storage warning until a
+successful save repairs the record.
+
+Validation used Node 24.22.1 / npm 10.9.2 from the runtime paths recorded in
+M0-01. A first full-suite attempt with the system Node 22.13.1 failed to start a
+Vitest worker due to an `undici` `bind` error; rerunning on the supported Node
+24 runtime succeeded:
+
+| Command | Result |
+| --- | --- |
+| `npm test` | Exit 0; 5 files, 34 tests passed |
+| `npm run typecheck` | Exit 0 |
+| `npm run lint` | Exit 0; zero warnings |
+| `npm run build` | Exit 0; production bundle built |
+
+Focused storage tests passed (7/7). No UI, real-device, or child/parent trial
+was part of this adapter task; this does not pass M0-GATE or establish the full
+NFR-AC-07.1 settings/reload acceptance.
