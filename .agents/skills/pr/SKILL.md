@@ -11,6 +11,8 @@ metadata:
 
 Use this template for writing the PR body:
 
+For this repository, write PR titles and explanatory prose primarily in Traditional Chinese (zh-TW), unless the user explicitly requests another language. Keep template labels such as Summary, Evidence, Merge Danger, Before, After, Door, and Blast Radius in English. Technical terms such as controller, reducer, and callback may remain in English, including in diagrams. Preserve code identifiers, commands, paths, requirement IDs, and official names; prioritize natural, readable explanations over translating every term.
+
 ```markdown
 ## Summary
 
@@ -35,6 +37,10 @@ Use this template for writing the PR body:
 ## Sections
 
 Skip all preambles and keep prose brief. Use the user's domain language from `GLOSSARY.md`.
+
+### Required visual
+
+Every PR Summary **must include at least one renderable diagram** that explains the actual change, such as a Mermaid flow, sequence, or relationship diagram. A text tree, pseudocode, or diff sketch may supplement the diagram, but does not satisfy this requirement by itself. Choose the smallest diagram that makes the changed behavior, relationships, or boundaries clear; do not add diagrams unrelated to the diff.
 
 ### Summary
 
