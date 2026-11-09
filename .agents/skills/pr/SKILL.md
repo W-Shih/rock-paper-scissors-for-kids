@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Use when writing a PR body."
+description: "Use when writing or editing a PR body, or repairing links in PR descriptions and review comments."
 metadata:
   credits:
     skill: show-me
@@ -33,6 +33,15 @@ For this repository, write PR titles and explanatory prose primarily in Traditio
 
 <optional: potential ramifications of merge>
 ```
+
+## Link validation gate
+
+Before publishing a PR body or repairing its links, complete
+[PR link validation](references/link-validation.md). Apply it to review and
+delivery comments written alongside the PR as well. After each remote edit,
+read back the saved content and validate its actual links; writing successfully
+is not the completion criterion. For a local-only draft, validate the draft and
+state that remote read-back remains pending.
 
 ## Sections
 
