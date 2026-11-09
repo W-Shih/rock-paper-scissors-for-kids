@@ -53,6 +53,11 @@
 - **驗證／Done**：乾淨安裝及四項品質指令可重現；至少一個純函式單測、一個 DOM smoke 測試與可 build 的 placeholder 頁面；紀錄實際版本與命令輸出。若 Playwright browser 安裝受限，記錄限制與後續執行方式。
 - **追蹤**：TD §2.4／§11.1；NFR-08（工程基線）。
 
+#### CI 工程補充（2026-11-09）
+
+- **範圍**：延伸 M0-01 的既有品質基線，新增 PR／`main` push／手動 GitHub Actions；執行乾淨安裝、typecheck／lint／test／build 與 Chromium／WebKit E2E，失敗保留報告與 trace。不改動產品範圍或 M0-GATE。
+- **驗證**：本機檢查結果與 GitHub runner 尚未驗證的限制記錄於 [開發與驗證紀錄](development.md#ci-validation-evidence-2026-11-09)；新增 workflow 不代表遠端 CI 已通過。
+
 ### M0-02 — 唯一猜拳規則與手勢／角色映射
 
 - **狀態**：`Done` — 2026-11-08。

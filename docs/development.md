@@ -298,3 +298,43 @@ require dependency, source or Playwright configuration changes.
 No real iPhone/iPad Safari, Android touch, child/parent trial, formal media,
 performance threshold or release acceptance was performed. M0-07 evidence
 assessment, M0-GATE and all later product tasks remain pending.
+
+## CI validation evidence (2026-11-09)
+
+Added [CI workflow](../.github/workflows/ci.yml) for all pull requests, pushes to
+`main`, and manual dispatch. One Ubuntu 24.04 job reads Node from `.nvmrc` and
+installs the npm version from `packageManager`, uses `npm ci`, then runs the
+existing quality scripts and Chromium/WebKit E2E against the production build.
+Browser installation includes Linux system dependencies. The E2E command enables
+line/HTML reporters and a 10-minute global timeout; the job has a 20-minute cap.
+Failed browser steps upload `playwright-report/` and `test-results/` for 7 days;
+the existing `retain-on-failure` trace policy remains unchanged.
+
+The workflow uses repository-read permissions, disables persisted checkout
+credentials, and cancels superseded runs for the same PR/ref. No deployment,
+secrets, new dependencies, coverage threshold, or product behavior was added.
+This follows the [Playwright CI guide](https://playwright.dev/docs/ci-intro)
+and [setup-node usage](https://github.com/actions/setup-node#usage).
+
+Local verification used Windows x64, Node 24.22.1 and npm 10.9.2 through the
+runtime paths above. Dependencies were already installed; no fresh install was
+performed for this workflow-only change. Commands directly invoked the installed
+tools with the supported Node prepended to PATH, matching the package scripts.
+
+| Check | Result |
+| --- | --- |
+| TypeScript `tsc --noEmit` | Exit 0 |
+| ESLint `. --max-warnings 0` | Exit 0 |
+| Vitest `run` | Exit 0; 9 files, 68 tests passed |
+| TypeScript + Vite production build | Exit 0; 15 modules |
+| Playwright `test --reporter=line,html --global-timeout=600000` | Exit 0; 12/12 passed across Chromium and WebKit; HTML report generated |
+| `git diff --check` | Exit 0 |
+
+Browser tests used the actual-user context with installed browser binaries.
+Manual workflow review checked event filters, least permissions, command order,
+version sources, timeout and failure-artifact conditions. A standalone YAML
+parser was unavailable locally. GitHub-hosted execution, Linux browser/system
+dependency installation, clean CI install, and failed-run artifact upload have
+not been executed; they must be confirmed after pushing the workflow. No GitHub
+branch-protection settings were changed. Safari real-device, parent/child and
+release acceptance remain unverified; M0-GATE status is unchanged.
