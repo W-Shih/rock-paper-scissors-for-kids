@@ -16,3 +16,12 @@
 **Documentation rule:** Changes to product scope start in PRD; changes to approved observable behavior start in Spec; implementation must meet both, without duplicating normative requirements.
 
 **Current status:** Documentation ready for prototype; completion and real-device acceptance are not yet verified.
+
+## Continuous integration
+
+[CI](.github/workflows/ci.yml) runs on pull requests, pushes to `main`, or manually
+from GitHub Actions. It installs locked dependencies and runs typecheck, lint,
+unit/DOM tests, production build, and Chromium/WebKit E2E. Failed browser runs
+upload HTML reports and traces for 7 days. Local commands and validation limits
+are in [the development guide](docs/development.md). Real-device Safari and
+parent/child acceptance remain separate checks.
