@@ -169,6 +169,7 @@
 - **交付**：3-2-1 Ready, Set, Go 畫面、SVG/CSS/WAAPI 前進、中央才 reveal、對結果的媒體效果接線；音訊不可阻擋相位、動畫取消／故障／watchdog 可轉正確靜態結果。
 - **驗證／Done**：受控 timer／animation fault 測試倒數順序、對手保密、取消、拒絕、超時、模式退出、舊 token；不因車速、動畫先後或重複 callback 改判結果。
 - **追蹤**：FR-06／10；AC-02.1～02.4；NFR-AC-03.3、04.1～04.3。
+- **狀態／證據**：`Done (implementation and automated checks)` — 2026-11-10. Shared Computer／Together media now shows timed `3` → `2` → `1` → `準備，開始！ / Ready, Set, Go!` beats before approach; the always-present bilingual status copy remains available. Both identical anonymous SVG vehicles use WAAPI to approach center; reveal waits for both animations, while the already locked `RoundResult` supplies the result. Existing controller cancellation, round/phase token checks and watchdog route media rejection/timeout into the static result; media completion never recalculates the outcome. Countdown and animation tests cover ordered beats, pre-reveal secrecy, cancellation on Home, both-animation reveal barrier, rejection, timeout, stale callbacks and duplicate notifications. Full `npm run check` passed: typecheck, lint, 93/93 unit tests, production build and 22/22 Chromium/WebKit E2E tests. This M1 adapter has no audio playback dependency, so audio cannot gate its phases; formal audio remains M3-02. Browser automation is not real iPhone/iPad Safari or child/parent trial evidence; M1-08/M3-05 device and trial checks remain outstanding.
 
 ### M1-06 — 第一條完整因果分鏡 + 正確靜態替代
 
@@ -411,6 +412,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M1-05 — 共用倒數、前進、中央揭曉與故障回退`。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線及 M1-04 character art / scene slice 有自動化證據；M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-06 — 第一條完整因果分鏡 + 正確靜態替代`。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線、M1-04 character art／scene slice 及 M1-05 共用倒數、中央揭曉與故障回退均有自動化證據；M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
 **目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
