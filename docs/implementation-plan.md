@@ -136,6 +136,7 @@
 - **交付**：首頁、學習／比賽／收藏／家長設定的導覽入口及最小畫面切換；比賽可選 Computer／Together，尚未完成的正式模式清楚標識原型狀態；UI 由 controller state 驅動，不複製 Domain。所有已出現文字先遵守中英並列，完整 Copy Audit 留 M3。
 - **驗證／Done**：DOM 測試導覽、返回、重進／cleanup，沒有重複 listener 或錯誤沿用舊回合；不以未實作的畫面冒充可玩模式。
 - **追蹤**：FR-09／10／12；AC-06.2、AC-10.1、AC-12.4；TD §4。
+- **狀態／證據**：Done (2026-11-09). Full `npm run check` passed under Node v24.22.1 / npm 11.19.1: typecheck, lint, 72 unit/DOM tests, production build, and 12 Playwright E2E cases (Chromium + WebKit). Shell navigation E2E were updated to enter Learn via home and its prototype start screen; the first run exposed those old direct-launch assumptions, then corrected cases passed in the full run. Parent visually inspected home and Play screenshots at 390×844. Safari device testing and parent-child playtesting were not performed.
 
 ### M1-02 — 三大手勢卡與 Touch-First 介面
 
@@ -405,6 +406,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M1-01 — 導覽骨架、模式選擇與狀態入口`。** M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-02 — 三大手勢卡與 Touch-First 介面`。** M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
 **目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。

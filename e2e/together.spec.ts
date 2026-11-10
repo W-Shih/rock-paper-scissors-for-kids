@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test';
 test('Together keeps handoff/countdown/approach private, reveals once centrally and replays cleanly', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/');
-  await page.getByRole('button', { name: '親子原型 / Together spike' }).click();
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '親子 / Together' }).click();
   await page.getByRole('button', { name: /^✊/ }).click();
   await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
   const screen = page.getByRole('region', { name: '親子流程原型 / Together flow spike' });
@@ -26,6 +27,7 @@ test('Together keeps handoff/countdown/approach private, reveals once centrally 
   await expect(screen.getByRole('figure')).toHaveCount(0);
   await expect(screen.locator('[aria-pressed="true"]')).toHaveCount(0);
   await page.getByRole('button', { name: '回首頁 / Home' }).click();
+  await page.getByRole('button', { name: '學習 / Learn' }).click();
   await expect(page.getByText('規則 1 / Rule 1 0/3', { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -33,14 +35,16 @@ test('Together keeps handoff/countdown/approach private, reveals once centrally 
 test('cancel, reload and browser back never restore a confirmed Together choice', async ({ page }) => {
   await page.goto('/');
   async function handoff() {
-    await page.getByRole('button', { name: '親子原型 / Together spike' }).click();
+    await page.getByRole('button', { name: '比賽 / Play' }).click();
+    await page.getByRole('button', { name: '親子 / Together' }).click();
     await page.getByRole('button', { name: /^✋/ }).click();
     await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
     await expect(page.getByRole('button', { name: '玩家 2 準備好了 / Player 2 is ready' })).toBeVisible();
   }
   await handoff();
   await page.getByRole('button', { name: '回首頁 / Home' }).click();
-  await page.getByRole('button', { name: '親子原型 / Together spike' }).click();
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '親子 / Together' }).click();
   await expect(page.locator('[aria-pressed="true"]')).toHaveCount(0);
   await page.reload(); await handoff();
   await page.reload();
@@ -49,7 +53,8 @@ test('cancel, reload and browser back never restore a confirmed Together choice'
   await page.goto('/?return-check');
   await page.goBack();
   await expect(page.getByRole('button', { name: '學習 / Learn', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '親子原型 / Together spike' }).click();
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '親子 / Together' }).click();
   await expect(page.locator('[aria-pressed="true"]')).toHaveCount(0);
 });
 
@@ -59,7 +64,8 @@ test('rejected browser animation shows correct static explanation and remains pl
     Element.prototype.animate = () => { throw new Error('Animation unavailable'); };
   });
   await page.goto('/');
-  await page.getByRole('button', { name: '親子原型 / Together spike' }).click();
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '親子 / Together' }).click();
   await page.getByRole('button', { name: /^✋/ }).click();
   await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
   await page.getByRole('button', { name: '玩家 2 準備好了 / Player 2 is ready' }).click();

@@ -487,3 +487,26 @@ high/critical findings. Dependencies and lockfile were not changed; remediation
 requires separate compatibility evaluation rather than `npm audit fix --force`.
 This gate does not claim a clean dependency-security audit, Safari real-device
 acceptance, parent/child trials, M0-GATE completion or release readiness.
+
+## M1-01 navigation shell validation (2026-11-09)
+
+Runtime: Node v24.22.1 and npm 11.19.1. This local npm version is outside the
+repository's declared npm ^10.9.2 range; CI uses the pinned npm 10.9.2 and must
+pass independently before merge. The supported Node executable was
+selected by prepending
+`C:/Users/a3459/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin`
+to `PATH`; npm was invoked with
+`node "D:/_apps/Program Files/nodejs/node_modules/npm/bin/npm-cli.js"`.
+
+Command: `node "D:/_apps/Program Files/nodejs/node_modules/npm/bin/npm-cli.js" run check`
+(with the PATH above). Result: exit 0; typecheck and lint passed, Vitest passed
+9 files / 72 tests, production build passed, and Playwright passed all 12 cases
+across Chromium and WebKit. The browser run required local preview-server
+binding outside the sandbox. The first E2E attempt had 6 failures because old
+tests assumed the app launched directly in Learn/Together; navigation was
+updated to traverse the new home/mode screens and Learn's own start screen.
+The final complete run passed.
+
+The parent inspected home and Play screenshots at a 390×844 browser viewport
+and reported no clipping. This was a desktop browser viewport inspection, not
+iPhone/iPad Safari hardware acceptance. No parent-child playtesting was done.
