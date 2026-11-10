@@ -4,7 +4,7 @@ import { createPlaceholder } from './placeholder';
 import { masteryRuleIds } from './rps-domain';
 import { createRoundController, type RoundControllerOptions, type RoundEvent } from './round-controller';
 import { gestures, playableCharacters, type Gesture } from './rps-domain';
-import { createGestureCard } from './gesture-card';
+import { createGestureSelection } from './gesture-selection';
 
 function gestureLabel(gesture: Gesture): string {
   const character = playableCharacters[gesture];
@@ -66,14 +66,7 @@ export function createLearnApp(options: Partial<RoundControllerOptions> = {}, on
             ? bilingual('再看看三種手勢，試試別的選擇。', 'Look at the three gestures and try another choice.')
             : bilingual('慢慢想，哪個手勢能贏對手呢？', 'Take your time. Which gesture can beat the opponent?'), true);
         }
-        const choices = document.createElement('div');
-        choices.className = 'gesture-selection';
-        choices.setAttribute('aria-label', bilingual('選擇手勢', 'Choose a gesture'));
-        for (const gesture of gestures) choices.append(createGestureCard(gesture, state.player1Selection === gesture));
-        const confirm = document.createElement('button');
-        confirm.type = 'button'; confirm.textContent = bilingual('確認', 'Confirm');
-        confirm.dataset.action = 'confirm'; confirm.disabled = !state.player1Selection;
-        choices.append(confirm);
+        const choices = createGestureSelection(state.player1Selection);
         const showDemo = document.createElement('button');
         showDemo.type = 'button'; showDemo.textContent = bilingual('直接看示範', 'Show demonstration');
         showDemo.dataset.action = 'demo'; choices.append(showDemo);
