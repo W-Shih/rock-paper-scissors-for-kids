@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
 
 test('Computer keeps its injected choice secret until reveal and shows the matching rule result', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.clock.install();
   await page.addInitScript(() => { Math.random = () => 0.4; });
@@ -27,6 +30,58 @@ test('Computer keeps its injected choice secret until reveal and shows the match
   const reveal = screen.getByRole('figure', { name: '中央揭曉結果 / Central reveal' });
   await expect(reveal).toContainText('Computer: ✌️ 剪刀 / Scissors');
   await expect(reveal).toContainText('Rock beats scissors!');
+  await expect(reveal.locator('.result-gestures')).toBeInViewport({ ratio: 1 });
+  await expect(reveal.locator('.static-causal-explanation')).toBeInViewport({ ratio: 1 });
   await expect(screen.getByRole('status')).toContainText('Round complete!');
   expect(errors).toEqual([]);
+});
+
+test('rock-beats-scissors causal storyboard supports either winner position and image failure fallback', async ({ page }, testInfo) => {
+  const screenshots = join(process.cwd(), 'test-results', 'm1-06');
+  await mkdir(screenshots, { recursive: true });
+  const screenshotPath = (name: string) => join(screenshots, `${testInfo.project.name}-${name}.png`);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.clock.install();
+  await page.addInitScript(() => { Math.random = () => 0.4; });
+  await page.goto('/');
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '電腦 / Computer' }).click();
+  const screen = page.getByRole('region', { name: '電腦對戰原型 / Computer play spike' });
+
+  await page.getByRole('button', { name: /^✊/ }).click();
+  await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
+  const leftWinner = screen.locator('.causal-storyboard');
+  await expect(leftWinner).toHaveAttribute('data-winner-position', 'left');
+  await expect(screen.locator('.causal-diagram')).toHaveAttribute('data-winner-position', 'left');
+  await expect(leftWinner.locator('.storyboard-step--1')).toBeVisible();
+  await expect(leftWinner.locator('.storyboard-step--2')).toBeVisible();
+  await expect(leftWinner.locator('.storyboard-step--3')).toContainText('everyone is okay');
+  await page.screenshot({ path: screenshotPath('rock-winner-left'), fullPage: true });
+  await expect(screen.getByRole('status')).toContainText('Round complete!');
+  await expect(screen.locator('.causal-storyboard--complete .storyboard-step--3')).toBeVisible();
+
+  await page.getByRole('button', { name: '再玩一次 / Play again' }).click();
+  await page.evaluate(() => { Math.random = () => 0; });
+  await page.getByRole('button', { name: /^✌️/ }).click();
+  await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
+  const rightWinner = screen.locator('.causal-storyboard');
+  await expect(rightWinner).toHaveAttribute('data-winner-position', 'right');
+  await expect(screen.locator('.causal-diagram')).toHaveAttribute('data-winner-position', 'right');
+  await expect(rightWinner.locator('.storyboard-step--3')).toContainText('everyone is okay');
+  await page.screenshot({ path: screenshotPath('rock-winner-right'), fullPage: true });
+  await expect(screen.getByRole('status')).toContainText('Round complete!');
+
+  await page.getByRole('button', { name: '再玩一次 / Play again' }).click();
+  await page.route('**/assets/characters/*.svg', route => route.abort());
+  await page.evaluate(() => { Math.random = () => 0.4; });
+  await page.getByRole('button', { name: /^✊/ }).click();
+  await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
+  const fallback = screen.getByRole('figure');
+  await expect(fallback.locator('[data-character-key]')).toHaveCount(0);
+  await expect(fallback.locator('.result-gestures')).toContainText('✊');
+  await expect(fallback.locator('.result-gestures')).toContainText('✌️');
+  await expect(fallback).toContainText('Rock beats scissors!');
+  await expect(fallback.locator('.causal-diagram svg')).toBeVisible();
+  await page.screenshot({ path: screenshotPath('rock-image-failure-fallback'), fullPage: true });
+  await expect(screen.getByRole('status')).toContainText('Round complete!');
 });

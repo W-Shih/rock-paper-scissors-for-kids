@@ -61,6 +61,81 @@ test('Computer shows original character art on cards and reveals both characters
     .toEqual(['/assets/characters/captain-dozer.svg', '/assets/characters/snip-snip.svg']);
 });
 
+test.each([
+  { player: 'rock', opponent: 0.4, position: 'left', rule: 'Rock beats scissors!', cause: 'Rock stops scissors.' },
+  { player: 'scissors', opponent: 0, position: 'right', rule: 'Rock beats scissors!', cause: 'Rock stops scissors.' },
+] as const)('rock-beats-scissors storyboard works with the winner on the $position', ({ player, opponent, position, rule, cause }) => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  const { screen, click } = mount({ random: () => opponent, media: { play(_effect, notify) { notifications.push(notify); } } });
+  click(new RegExp(`^${player === 'rock' ? '✊' : '✌️'}`)); click('確認 / Confirm');
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+
+  const result = getByRole(screen, 'figure');
+  expect(result.querySelector('.causal-storyboard')?.getAttribute('data-winner-position')).toBe(position);
+  expect(result.querySelector('.result-gestures')?.textContent).toContain('✊');
+  expect(result.querySelector('.result-gestures')?.textContent).toContain('✌️');
+  expect(result.textContent).toContain(rule);
+  expect(result.textContent).toContain(cause);
+});
+
+test.each([
+  { player: 'rock', opponent: 0, position: null, cause: '一起揮手／Wave together', rule: "It's a tie!" },
+  { player: 'rock', opponent: 0.4, position: 'left', cause: '推開剪刀／Opens shears', rule: 'Rock beats scissors!' },
+  { player: 'rock', opponent: 0.8, position: 'right', cause: '布蓋住石頭／Covers rock', rule: 'Paper beats rock!' },
+  { player: 'scissors', opponent: 0, position: 'right', cause: '推開剪刀／Opens shears', rule: 'Rock beats scissors!' },
+  { player: 'scissors', opponent: 0.4, position: null, cause: '一起揮手／Wave together', rule: "It's a tie!" },
+  { player: 'scissors', opponent: 0.8, position: 'left', cause: '剪開布帶／Cuts cloth', rule: 'Scissors beat paper!' },
+  { player: 'paper', opponent: 0, position: 'left', cause: '布蓋住石頭／Covers rock', rule: 'Paper beats rock!' },
+  { player: 'paper', opponent: 0.4, position: 'right', cause: '剪開布帶／Cuts cloth', rule: 'Scissors beat paper!' },
+  { player: 'paper', opponent: 0.8, position: null, cause: '一起揮手／Wave together', rule: "It's a tie!" },
+] as const)('result diagram points the correct way for $player against opponent choice $opponent', ({ player, opponent, position, cause, rule }) => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  const { screen, click } = mount({ random: () => opponent, media: { play(_effect, notify) { notifications.push(notify); } } });
+  const symbol = player === 'rock' ? '✊' : player === 'scissors' ? '✌️' : '✋';
+  click(new RegExp(`^${symbol}`)); click('確認 / Confirm');
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+  const result = getByRole(screen, 'figure');
+  const diagram = result.querySelector<HTMLElement>('.causal-diagram')!;
+  expect(diagram.dataset.winnerPosition ?? null).toBe(position);
+  expect(diagram.querySelector('svg')?.textContent).toContain(cause);
+  expect(result.querySelector('.static-causal-explanation')?.textContent).toContain(rule);
+});
+
+test('failed character images leave large gestures, the bilingual rule and a self-contained causal diagram', () => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  const { screen, click } = mount({ random: () => 0.4, media: { play(_effect, notify) { notifications.push(notify); } } });
+  click(/^✊/); click('確認 / Confirm');
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+  const image = screen.querySelector<HTMLImageElement>('figure [data-character-key="rock"]')!;
+  fireEvent.error(image);
+  const result = getByRole(screen, 'figure');
+  expect(result.querySelectorAll('[data-character-key]')).toHaveLength(0);
+  expect(result.querySelector('.result-gestures')?.textContent).toContain('✊');
+  expect(result.querySelector('.result-gestures')?.textContent).toContain('✌️');
+  expect(result.textContent).toContain('石頭贏剪刀！ / Rock beats scissors!');
+  expect(result.querySelector('.causal-diagram svg')).toBeTruthy();
+  expect(result.textContent).toContain('The dozer nudges the cutting attachment open');
+});
+
+test('static media recovery preserves the full cause and does not restart storyboard motion', () => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  const { screen, click } = mount({ random: () => 0.4, media: { play(_effect, notify) { notifications.push(notify); } } });
+  click(/^✊/); click('確認 / Confirm');
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+  const story = screen.querySelector('.causal-storyboard')!;
+  expect(story.classList.contains('causal-storyboard--complete')).toBe(false);
+  notifications[2]!({ type: 'MEDIA_FAILED', roundId: 1, phase: 'reveal' });
+  const staticStory = screen.querySelector('.causal-storyboard')!;
+  expect(staticStory.classList.contains('causal-storyboard--complete')).toBe(true);
+  expect(staticStory.querySelector('.storyboard-step--3')?.textContent).toContain('everyone is okay');
+  expect(getByRole(screen, 'figure').textContent).toContain('Rock beats scissors!');
+  expect(getByRole(screen, 'button', { name: '看完了 / Finished watching' })).toBeTruthy();
+});
+
 test('Home and dispose discard a locked choice mid-countdown without restoring a secret', () => {
   const notifications: Array<(event: RoundEvent) => void> = [];
   const random = vi.fn().mockReturnValueOnce(0).mockReturnValueOnce(0.8);

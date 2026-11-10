@@ -22,5 +22,16 @@ Names and gesture mapping are content requirements maintained in
 the bilingual game labels remain HTML text. Future changes or replacements
 must update this record and identify any third-party license or attribution.
 
+## M1-06 inline causal storyboard
+
+Created in this repository on 2026-11-10 as DOM text and inline SVG in
+`src/computer-ui.ts`, with CSS motion in `src/style.css`. The vector geometry
+for the dozer blade, opened shear, cut ribbons, soft cloth cover, and friendly
+tie was authored for this project. It embeds no external image, font, stock
+art, or third-party material. The large hand symbols and short frame captions
+are part of the same original presentation treatment. These inline visuals may
+be used and modified with the application; formal release asset review remains
+in M3-07.
+
 This is an internal source record, not a legal review or a claim of child /
 parent acceptance. Formal release asset audit remains in M3-07.
