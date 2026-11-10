@@ -76,8 +76,8 @@ Each smell reads *what it is* → *how to fix*; match it against the diff using 
 
 Read [model routing](../implement/references/model-routing.md). Explicitly select
 its reviewer model and effort for each axis, including any risk-based escalation.
-Keep the main agent's current settings for aggregation. Reviewers report findings
-without editing the reviewed files.
+Keep the main agent's current settings for aggregation. Reviewers preserve the
+reviewed implementation and tests; tracking-document edits follow step 5.
 
 Issue both sub-agent calls together, in the foreground, and aggregate the reports they return. Both reviewers use the same saved snapshot from step 1 rather than rerunning capture commands against the live working tree. If live content is needed, verify it still matches the snapshot; changed content requires a new snapshot and review of the affected scope.
 
@@ -95,7 +95,31 @@ Issue both sub-agent calls together, in the foreground, and aggregate the report
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
+Include step 5's tracking requirements in each reviewer prompt. Assign one reviewer
+per tracking file to serialize writes when both axes need the same document.
+
 ### 5. Aggregate
+
+#### Persist findings that need follow-up
+
+When a review comment needs durable follow-up (including a deferred optional
+suggestion), the reviewer responsible for it directly updates the appropriate
+repository tracking document as part of the current PR's changes. Use the existing
+tracking location, such as the relevant task in `docs/implementation-plan.md` or
+an engineering record in `docs/development.md`; keep architectural decisions in
+`docs/technical-design.md` when applicable. Record the source PR / review reference,
+axis and priority, affected locations, evidence and impact, why it is deferred,
+and a concrete revisit trigger or completion criterion. Preserve optional status
+and approved scope; tracking a suggestion does not approve its implementation.
+
+Before completing aggregation, verify every finding marked for follow-up has a
+saved entry and return its file / section link beside the finding. Include these
+edits in the same PR through the active delivery workflow; a PR comment alone or
+a request for someone else to record it does not complete tracking. Review the
+tracking diff against the findings and refresh affected snapshot coverage under
+step 1. For WIP reviews without a PR, make the local tracking edit and report its
+path; if writing is blocked or the PR is already closed, report the pending action
+and limitation explicitly rather than claiming it was included in that PR.
 
 Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
 
