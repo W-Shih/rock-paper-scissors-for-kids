@@ -42,6 +42,25 @@ test('Computer draws only once on confirmation and exposes no opponent card whil
   expect(random).toHaveBeenCalledOnce();
 });
 
+test('Computer shows original character art on cards and reveals both characters only with the result', async () => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  const { screen, click } = mount({ random: () => 0.4, media: { play(_effect, notify) { notifications.push(notify); } } });
+  const cards = screen.querySelectorAll<HTMLButtonElement>('.gesture-card');
+  expect(cards).toHaveLength(3);
+  expect(Array.from(cards, card => card.querySelector<HTMLImageElement>('[data-character-key]')?.dataset.characterKey))
+    .toEqual(['rock', 'scissors', 'paper']);
+  expect(screen.querySelector('[data-scene="construction-site"]')).toBeTruthy();
+  click(/^✊/); click('確認 / Confirm');
+  expect(screen.querySelector('[data-character-key="scissors"]')).toBeNull();
+  expect(screen.innerHTML).not.toMatch(/Snip-Snip|剪剪高手|scissors\.svg/i);
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+  const revealedCharacters = screen.querySelectorAll('figure [data-character-key]');
+  expect(Array.from(revealedCharacters, image => (image as HTMLImageElement).dataset.characterKey)).toEqual(['rock', 'scissors']);
+  expect(Array.from(revealedCharacters, image => (image as HTMLImageElement).getAttribute('src')))
+    .toEqual(['/assets/characters/captain-dozer.svg', '/assets/characters/snip-snip.svg']);
+});
+
 test('Home and dispose discard a locked choice mid-countdown without restoring a secret', () => {
   const notifications: Array<(event: RoundEvent) => void> = [];
   const random = vi.fn().mockReturnValueOnce(0).mockReturnValueOnce(0.8);

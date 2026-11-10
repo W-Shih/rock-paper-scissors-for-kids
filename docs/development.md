@@ -551,3 +551,43 @@ Chromium/WebKit, not physical Safari. Real iPhone/iPad testing and child/parent
 observation remain unverified; this evidence completes M1-03 automated work only
 and does not pass the M1 exit gate or claim finished animation, emotional repair,
 or release acceptance.
+
+## M1-04 character and scene validation (2026-11-10)
+
+Three project-authored layered SVG characters and one warm construction scene
+are mapped by gesture in `src/character-assets.ts`. Shared selection cards retain
+the large hand symbols and bilingual labels; Computer inserts the actual pair
+of character images only after controller reveal. Asset sources and use are
+recorded in [the asset record](asset-rights.md). No rule, progress, storage,
+animation timing, or dependency change was made.
+
+Validation used Windows, Node v24.22.2 and npm 11.13.0. Node satisfies the declared
+range; local npm is outside the project's npm ^10.9.2 range. GitHub CI uses the
+pinned npm 10.9.2 and must pass separately before merge.
+
+| Check | Observed result |
+| --- | --- |
+| TDD red: `npm test -- --run src/computer-ui.test.ts` before implementation | New artwork-key assertion failed with three undefined keys |
+| Final `npm run check`, after final scene SVG revision | Exit 0: typecheck, lint, 91/91 unit/DOM tests (11 files), production build, 22/22 Chromium/WebKit E2E |
+| Focused character-scene browser checks | 320×740 artwork loading, geometry and secrecy passed in Chromium and WebKit |
+| Independent Standards / Spec review | Frozen `M1-04 review-v1`, based on `9c8edb87ec7e4ea3e46b85f9be13b2be4813c0b7`: zero findings on both axes |
+
+The sandbox blocked the preview-server/browser startup; the full command passed
+in the actual-user context. One intermediate run there failed with WebKit
+`browserContext.newPage: Target page, context or browser has been closed`.
+The focused browser run and final full run passed without changing assertions,
+excluding browsers, or adding automatic retries. The cause remains unproven;
+passing runs do not establish a fix for the previously recorded Windows WebKit
+instability.
+
+Generated screenshots are in the ignored directory `test-results/m1-04/`:
+`{chromium,webkit}-320-{selection,reveal}.png`; the E2E test regenerates them.
+The coordinating agent visually inspected narrow selection and reveal views,
+including the final selection with the shallow excavation. Hand symbols remain
+prominent and text/buttons do not overlap. Screenshots are local evidence,
+not published artifacts. No physical iPhone/iPad Safari, child/parent trial,
+formal animation, or release acceptance was performed. M1-05 is next; M1 Exit
+and the later real-device/parent acceptance gates remain open.
+
+Implementation used Luna / high; independent Standards and Spec reviewers used
+Sol / medium with separate fresh contexts. No model fallback was required.

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="144" viewBox="0 0 240 144" role="img">
+  <title>Captain Dozer, a friendly bulldozer</title>
+  <defs>
+    <linearGradient id="yellow" x2="0" y2="1"><stop stop-color="#ffd76a"/><stop offset="1" stop-color="#ee9d32"/></linearGradient>
+  </defs>
+  <g stroke="#60412b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <g data-layer="tracks">
+      <path fill="#4a5054" d="M35 104h126a17 17 0 0 1 0 34H35a17 17 0 0 1 0-34Z"/>
+      <path fill="#9ba3a2" d="M49 111h99a10 10 0 0 1 0 20H49a10 10 0 0 1 0-20Z"/>
+      <circle fill="#d8d4c8" cx="65" cy="121" r="5"/><circle fill="#d8d4c8" cx="132" cy="121" r="5"/>
+    </g>
+    <g data-layer="body">
+      <path fill="url(#yellow)" d="M48 81q0-16 17-16h71q20 0 29 20l8 22H45Z"/>
+      <path fill="#8bd2df" d="M93 70h31q13 0 19 17H93Z"/>
+      <path fill="#f8bf51" d="M53 84h32v18H48Z"/>
+    </g>
+    <g data-layer="face">
+      <circle fill="#fffdf4" cx="104" cy="91" r="6"/><circle fill="#fffdf4" cx="126" cy="91" r="6"/>
+      <circle fill="#3f3025" cx="106" cy="92" r="2.3"/><circle fill="#3f3025" cx="128" cy="92" r="2.3"/>
+      <path fill="none" d="M108 101q7 7 14 0"/>
+    </g>
+    <g data-layer="dozer-blade">
+      <path fill="#c6d0ce" d="M32 92H17l-7 31q0 5 6 5h31l8-8-3-21Z"/>
+      <path fill="#84928f" d="M14 123h36l-2 9H12Z"/>
+      <path fill="none" d="M48 106 38 98"/>
+    </g>
+  </g>
+</svg>

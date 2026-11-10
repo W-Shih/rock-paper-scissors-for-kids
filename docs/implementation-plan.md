@@ -161,6 +161,7 @@
 - **交付**：三主角可辨識的原創分層 SVG／合理 placeholder、一個單純工地場景、手勢及角色 key 對照；素材出處／權利記錄，不依賴線上第三方圖檔。
 - **驗證／Done**：三種手勢與車外觀一對一，畫面能在窄裝置辨識；文字、手勢和關鍵按鈕不受遮擋；素材權利未知者明確標「prototype only」並列正式替換任務。
 - **追蹤**：FR-01／07；AC-01.2／01.4、AC-03.3；TD §7。
+- **狀態／證據**：`Done (implementation, automated checks and independent review)` — 2026-11-10. Gesture-keyed local artwork is in `public/assets/characters/` and `public/assets/scenes/`; all SVGs were authored for this repository, with no external source or third-party image request. The selection cards show the matching illustration while keeping the actual hand symbol and bilingual labels in the DOM. Computer uses one decorative warm daylight site scene; player character art is visible on selection, while opponent-specific art is added only in the result figure after controller reveal. The generic scene remains non-identifying during countdown/approach. Browser checks at 320×740 validate intrinsic and displayed image geometry, card bounds, scene load, reveal art, and pre-reveal secrecy in Chromium and WebKit. Final `npm run check` passed: typecheck, lint, 91/91 tests across 11 files, production build and 22/22 E2E tests. Screenshots: `test-results/m1-04/{chromium,webkit}-320-{selection,reveal}.png` (ignored generated evidence). Independent Standards and Spec reviews of the frozen M1-04 snapshot found no actionable issues. No real iPhone/iPad Safari or child/parent trial was performed; character asset source/rights are recorded in `docs/asset-rights.md`. Next: M1-05 animation and timing, without treating this static-art slice as M1 Exit evidence.
 
 ### M1-05 — 共用倒數、前進、中央揭曉與故障回退
 
@@ -410,6 +411,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M1-03 — 公平 Computer 單回合接線`。** M1-02 的實作與自動化 viewport 驗證已完成；M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-05 — 共用倒數、前進、中央揭曉與故障回退`。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線及 M1-04 character art / scene slice 有自動化證據；M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
 **目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。

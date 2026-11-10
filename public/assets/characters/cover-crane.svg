@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="144" viewBox="0 0 240 144" role="img">
+  <title>Cover Crane, a friendly crane carrying a soft cloth</title>
+  <defs>
+    <linearGradient id="yellow" x2="0" y2="1"><stop stop-color="#ffd76a"/><stop offset="1" stop-color="#e99a2d"/></linearGradient>
+    <linearGradient id="cloth" x2="1" y2="1"><stop stop-color="#78c8d4"/><stop offset="1" stop-color="#459baa"/></linearGradient>
+  </defs>
+  <g stroke="#60412b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <g data-layer="wheels-and-chassis">
+      <path fill="#f0ae3d" d="M38 95h112l16 20H35Z"/>
+      <circle fill="#4a5054" cx="62" cy="119" r="15"/><circle fill="#d8d4c8" cx="62" cy="119" r="6"/>
+      <circle fill="#4a5054" cx="131" cy="119" r="15"/><circle fill="#d8d4c8" cx="131" cy="119" r="6"/>
+    </g>
+    <g data-layer="crane-cab-and-face">
+      <path fill="url(#yellow)" d="M43 69q0-12 13-12h28q14 0 17 14v27H43Z"/>
+      <path fill="#8bd2df" d="M57 63h22q11 0 13 14H57Z"/>
+      <circle fill="#fffdf4" cx="63" cy="84" r="5.5"/><circle fill="#fffdf4" cx="82" cy="84" r="5.5"/>
+      <circle fill="#3f3025" cx="65" cy="85" r="2.2"/><circle fill="#3f3025" cx="84" cy="85" r="2.2"/>
+      <path fill="none" d="M67 92q6 5 12 0"/>
+    </g>
+    <g data-layer="crane-boom">
+      <path fill="#efb544" d="m86 67 49-43 10 10-39 48Z"/>
+      <path fill="#f6cb67" d="m130 28 48-12 4 10-43 17Z"/>
+      <circle fill="#ffe18a" cx="136" cy="31" r="5"/>
+      <path fill="none" d="m176 25 9 36"/>
+    </g>
+    <g data-layer="soft-cloth">
+      <path fill="url(#cloth)" d="M169 52q18-12 34 0 13-10 25 1l-2 34q-9 5-17-1-12 10-26 1l-15 5Z"/>
+      <path fill="none" stroke="#e6f4e9" stroke-width="3" d="M176 61q11-4 20 1m6-2q8-3 17 1m-39 10q10-4 21 0m7 0 14 1m-43 9q9-4 18 0"/>
+      <path fill="#459baa" d="M188 90q12 9 21-1l-1 8q-11 6-19-2Z"/>
+    </g>
+  </g>
+</svg>

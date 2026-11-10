@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="144" viewBox="0 0 240 144" role="img">
+  <title>Snip-Snip, a friendly hydraulic shear excavator</title>
+  <defs><linearGradient id="yellow" x2="0" y2="1"><stop stop-color="#ffd76a"/><stop offset="1" stop-color="#e99a2d"/></linearGradient></defs>
+  <g stroke="#60412b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <g data-layer="tracks">
+      <path fill="#4a5054" d="M38 107h119a17 17 0 0 1 0 34H38a17 17 0 0 1 0-34Z"/>
+      <path fill="#9ba3a2" d="M51 114h94a10 10 0 0 1 0 20H51a10 10 0 0 1 0-20Z"/>
+      <circle fill="#d8d4c8" cx="68" cy="124" r="5"/><circle fill="#d8d4c8" cx="130" cy="124" r="5"/>
+    </g>
+    <g data-layer="body">
+      <path fill="url(#yellow)" d="M50 92h93l17 20H42Z"/>
+      <path fill="#f5bb49" d="M74 72q2-14 18-14h30q16 0 19 17v20H72Z"/>
+      <path fill="#8bd2df" d="M94 64h24q10 0 12 14H91Z"/>
+      <circle fill="#fffdf4" cx="100" cy="85" r="5.5"/><circle fill="#fffdf4" cx="120" cy="85" r="5.5"/>
+      <circle fill="#3f3025" cx="102" cy="86" r="2.2"/><circle fill="#3f3025" cx="122" cy="86" r="2.2"/>
+      <path fill="none" d="M104 94q6 5 12 0"/>
+    </g>
+    <g data-layer="boom">
+      <path fill="#f4b740" d="m127 71 11-10 32-20 8 10-32 26-10 11Z"/>
+      <circle fill="#ffe18a" cx="140" cy="67" r="5"/>
+      <path fill="#f4b740" d="m170 45 24-22 9 8-18 28Z"/>
+    </g>
+    <g data-layer="hydraulic-shear">
+      <path fill="#687b7d" d="m194 25 11-7 12 7-9 10 12 16-7 13-14-18-9 3-5-10Z"/>
+      <path fill="#c2d0cb" d="m193 42-16 11 13 9 14-9Z"/>
+      <path fill="#8c9b98" d="m200 43 15 6 4 18-8 3-7-14-9-4Z"/>
+      <circle fill="#f4b740" cx="201" cy="43" r="4"/>
+    </g>
+  </g>
+</svg>
