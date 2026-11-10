@@ -153,6 +153,7 @@
 - **交付**：以注入式、與玩家選擇獨立的等機率三選一來源鎖定電腦手勢；雙方選擇一旦確認便計算唯一結果，揭曉前電腦車種保持中性／保密。
 - **驗證／Done**：單測可強制 RNG 覆蓋三輸出、9 個配對與獨立性；DOM／E2E 確認猜拳前無對手手勢、車形或 ARIA 洩漏、揭曉後結果與 engine 相同；無為取悅孩子而重抽或預設勝利。
 - **追蹤**：FR-02／04；AC-08.1～08.3；NFR-AC-08.1～08.2。
+- **狀態／證據**：`Done (implementation and automated checks)` — 2026-11-09. Computer mode now uses the injected controller RNG only when the player confirms, shares the existing gesture cards and app shell, hides all opponent-specific DOM until central reveal, and presents the engine's bilingual hand pair, rule and outcome. Unit tests force all three RNG buckets across all nine independently expected player/computer pairs, verify no draw before confirmation, one result/draw per confirmation and a fresh draw after replay. DOM checks cover private countdown/neutral approach, result reveal and discarding a locked choice on Home/dispose. Playwright forces `Math.random` before app startup and verifies no opponent gesture/vehicle/ARIA clue before reveal and the matching engine result in Chromium and WebKit. `npm run check` passed under Node v24.22.1 / local npm 11.19.1: typecheck, lint, 88/88 unit/DOM tests, production build, and 20/20 E2E tests. The initial sandbox E2E launch was denied loopback binding; the same full command passed in the actual-user context. Additional final focused typecheck and 30/30 tests passed after adding replay/exit coverage. Formal character assets/animation remain M1-04 onward; no real iPhone/iPad Safari or child/parent trial was performed.
 
 ### M1-04 — 三位原創角色與一個工地場景（首版）
 

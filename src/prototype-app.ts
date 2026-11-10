@@ -1,5 +1,6 @@
 import { createLearnApp } from './learn-ui';
 import { createTogetherApp } from './together-ui';
+import { createComputerApp } from './computer-ui';
 import { formatBilingualText as bilingual } from './bilingual-text';
 
 type Screen = 'home' | 'play' | 'computer' | 'garage' | 'parent' | 'learn' | 'together';
@@ -49,11 +50,15 @@ export function createPrototypeApp() {
       button(bilingual('親子', 'Together'), () => { screen = 'together'; render(); });
       button(bilingual('返回', 'Back'), home);
     } else if (screen === 'computer' || screen === 'garage') {
-      message(screen === 'computer'
-        ? bilingual('電腦對戰目前為原型，尚未提供遊玩。', 'Computer play is a prototype and is not available yet.')
-        : bilingual('收藏館目前為原型，尚未提供瀏覽。', 'Garage is a prototype and is not available yet.'), true);
-      button(bilingual('返回', 'Back'), () => { screen = screen === 'computer' ? 'play' : 'home'; render(); });
-      button(bilingual('回首頁', 'Home'), home);
+      if (screen === 'computer') {
+        current = createComputerApp({}, () => { screen = 'home'; render(); });
+        screenRoot.append(current.element);
+        button(bilingual('返回', 'Back'), () => { screen = 'play'; render(); });
+      } else {
+        message(bilingual('收藏館目前為原型，尚未提供瀏覽。', 'Garage is a prototype and is not available yet.'), true);
+        button(bilingual('返回', 'Back'), home);
+      }
+      if (screen !== 'computer') button(bilingual('回首頁', 'Home'), home);
     } else if (screen === 'parent') {
       if (!parentConfirmed) {
         message(bilingual('家長設定入口。請確認由家長繼續。', 'Parent settings. Confirm that a parent is continuing.'));

@@ -510,3 +510,44 @@ The final complete run passed.
 The parent inspected home and Play screenshots at a 390×844 browser viewport
 and reported no clipping. This was a desktop browser viewport inspection, not
 iPhone/iPad Safari hardware acceptance. No parent-child playtesting was done.
+
+## M1-03 Computer play validation (2026-11-09)
+
+The Computer route now mounts a playable one-round prototype using the shared
+gesture selection cards and round controller. The controller samples its
+injected uniform random source only when the player confirms; repeat or stale
+confirmations do not resample. The Computer presentation uses the existing
+prototype countdown and neutral vehicle approach, then shows the controller's
+locked player/computer gestures, rule explanation and outcome at central reveal.
+Its media failure path retains the already-determined result as a static reveal.
+No formal character art, animation pack, sound, celebration media, or finished
+loss-repair behavior was introduced; those remain in their planned later tasks.
+
+Tests cover all nine known player/computer pairs with forced RNG bucket values,
+all three RNG outputs, independence from the provisional player selection,
+single confirmation, replay sampling a new value, and Home/dispose during a
+locked countdown. DOM assertions inspect the rendered pre-reveal HTML and the
+actual revealed result. Playwright sets `Math.random` before application start,
+then checks countdown and approach for opponent gesture/vehicle/ARIA clues and
+checks that the revealed pair and explanation match the locked result.
+
+Runtime: Windows x64, Node v24.22.1 and local npm 11.19.1. The supported Node
+executable was prepended to `PATH`; npm was invoked through
+`node "D:/_apps/Program Files/nodejs/node_modules/npm/bin/npm-cli.js"`.
+The first full `npm run check` attempt passed typecheck, lint, all 88 unit/DOM
+tests and production build, but Playwright's preview server could not bind
+`127.0.0.1:4173` inside the sandbox (`EACCES`). The same full command was rerun
+in the actual-user execution context and passed:
+
+| Check | Result |
+| --- | --- |
+| `npm run check` | Exit 0; typecheck, lint, 88/88 unit/DOM tests, production build, and 20/20 Playwright cases passed (10 Chromium, 10 WebKit) |
+| Focused typecheck after final exit/replay coverage | Exit 0 |
+| Focused Vitest: `src/computer-ui.test.ts src/round-controller.test.ts src/prototype-app.test.ts` | Exit 0; 3 files, 30 tests passed |
+
+The final supplemental checks were limited to added tests; implementation code
+was unchanged after the successful full check. Browser E2E used Playwright
+Chromium/WebKit, not physical Safari. Real iPhone/iPad testing and child/parent
+observation remain unverified; this evidence completes M1-03 automated work only
+and does not pass the M1 exit gate or claim finished animation, emotional repair,
+or release acceptance.
