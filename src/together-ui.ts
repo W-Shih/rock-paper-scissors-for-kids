@@ -3,7 +3,7 @@ import { learnRuleContent } from './learn-domain';
 import { gestures, playableCharacters, type Gesture } from './rps-domain';
 import { createRoundController, type RoundControllerOptions, type RoundEvent } from './round-controller';
 import { createTogetherMedia } from './together-media';
-import { createGestureCard } from './gesture-card';
+import { createGestureSelection } from './gesture-selection';
 
 function label(gesture: Gesture) {
   const c = playableCharacters[gesture];
@@ -39,14 +39,7 @@ export function createTogetherApp(options: Partial<RoundControllerOptions> = {},
     else if (s.phase === 'choosing-p1' || s.phase === 'choosing-p2') {
       if (s.phase === 'choosing-p1') text(bilingual('玩家 1 選擇手勢', 'Player 1 chooses a gesture'));
       const selection = s.phase === 'choosing-p1' ? s.player1Selection : s.player2Selection;
-      const choices = document.createElement('div');
-      choices.className = 'gesture-selection';
-      choices.setAttribute('aria-label', bilingual('選擇手勢', 'Choose a gesture'));
-      for (const gesture of gestures) choices.append(createGestureCard(gesture, selection === gesture));
-      const confirm = document.createElement('button');
-      confirm.type = 'button'; confirm.textContent = bilingual('確認', 'Confirm');
-      confirm.dataset.action = 'confirm'; confirm.disabled = !selection;
-      choices.append(confirm);
+      const choices = createGestureSelection(selection);
       element.append(choices);
     } else if (s.phase === 'handoff') button(bilingual('玩家 2 準備好了', 'Player 2 is ready'), 'ready');
     else if (s.phase === 'countdown') text(bilingual('3、2、1，準備，開始！', '3, 2, 1 — Ready, Set, Go!'), true);

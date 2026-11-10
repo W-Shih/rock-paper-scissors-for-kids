@@ -145,6 +145,7 @@
 - **驗證／Done**：DOM + mobile viewport 測試重選、確認、快速連點、鍵盤／焦點、無音訊辨識；檢查 iPhone 直向與 iPad 直／橫向主要按鈕和安全區，不以 desktop viewport 模擬充當真機結論。
 - **追蹤**：FR-01／12；AC-01.1～01.3、AC-12.2；NFR-AC-02.1～02.2、06.1。
 - **狀態／證據**：`Done (implementation and automated checks)` — 2026-11-09. Learn／Together 使用共用的三張雙語手勢卡；Playwright Chromium 與 WebKit 在 390×844、820×1180、1180×820 viewport 覆蓋重選、快速連點、鍵盤確認、焦點、無音訊辨識及控件尺寸／水平溢位。DOM focused suites 32/32 passed；viewport E2E 6/6 passed。WebKit viewport screenshots 位於 ignored `test-results/m1-02/webkit-{iphone-portrait,ipad-portrait,ipad-landscape}.png`，經 Review 視覺檢查，三個尺寸均顯示卡片、選取勾號及主要按鈕，未見裁切／重疊。**AC-12.2／NFR-AC-02.2 的實機 Safari 與實際工具列／安全區操作尚未驗證**；Playwright viewport 與 CSS safe-area 支援不能代替 iPhone／iPad 真機檢查。兒童／家長試玩亦未執行；M1-08／M3-05 仍需記錄裝置證據。
+- **抽取整理（2026-11-09）**：Learn 與 Together 現共用 `createGestureSelection(selection)`，集中三卡順序、ARIA 標籤、選取狀態及雙語確認鈕；Learn 仍在回傳容器末端附加示範按鈕，Together 仍由當前玩家狀態提供 selection。新增 null 與三種 Gesture 的 DOM contract 測試。Node v24.22.2 / npm 11.13.0：`npm run check` 通過（typecheck、lint、77/77 Vitest tests、production build、18/18 Playwright E2E：Chromium 9、WebKit 9）。首次 sandbox 執行因無法綁定 `127.0.0.1:4173` 未能啟動 E2E；獲准提升權限後完整重跑通過。此工程整理不改產品行為；M1-02 既有真機 Safari／親子驗收仍待完成，獨立 review 與交付亦待進行。
 
 ### M1-03 — 公平 Computer 單回合接線
 
