@@ -159,3 +159,25 @@ test('a later WAAPI setup exception still cleans up the already started animatio
   click('看完了 / Finished watching');
   expect(screen.textContent).toContain('Round complete!');
 });
+
+test('gesture cards show the fixed bilingual gesture and vehicle mapping, and selection can be changed before confirm', () => {
+  const { screen, click } = mount();
+  const mappings = [
+    ['✊', '石頭 / Rock', '推推隊長（推土機）', 'Captain Dozer'],
+    ['✌️', '剪刀 / Scissors', '剪剪高手（液壓剪挖土機）', 'Snip-Snip'],
+    ['✋', '布 / Paper', '蓋蓋吊車（吊車＋柔軟大布）', 'Cover Crane'],
+  ];
+  for (const [symbol, gesture, vehicleZh, vehicleEn] of mappings) {
+    const card = getByRole(screen, 'button', { name: new RegExp(`^${symbol}`) });
+    expect(card.textContent).toContain(gesture);
+    expect(card.textContent).toContain(vehicleZh);
+    expect(card.textContent).toContain(vehicleEn);
+    expect(card.classList.contains('gesture-card')).toBe(true);
+  }
+  click(/^✊/);
+  expect(getByRole(screen, 'button', { name: /^✊/ }).getAttribute('aria-pressed')).toBe('true');
+  click(/^✌️/);
+  expect(getByRole(screen, 'button', { name: /^✊/ }).getAttribute('aria-pressed')).toBe('false');
+  expect(getByRole(screen, 'button', { name: /^✌️/ }).getAttribute('aria-pressed')).toBe('true');
+  expect((getByRole(screen, 'button', { name: '確認 / Confirm' }) as HTMLButtonElement).disabled).toBe(false);
+});

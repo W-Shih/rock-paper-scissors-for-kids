@@ -144,6 +144,7 @@
 - **交付**：三張突出手勢的選拳卡、車車中英名稱、確認前重選、可看見的已選狀態、可操作按鈕與基本響應式布局。
 - **驗證／Done**：DOM + mobile viewport 測試重選、確認、快速連點、鍵盤／焦點、無音訊辨識；檢查 iPhone 直向與 iPad 直／橫向主要按鈕和安全區，不以 desktop viewport 模擬充當真機結論。
 - **追蹤**：FR-01／12；AC-01.1～01.3、AC-12.2；NFR-AC-02.1～02.2、06.1。
+- **狀態／證據**：`Done (implementation and automated checks)` — 2026-11-09. Learn／Together 使用共用的三張雙語手勢卡；Playwright Chromium 與 WebKit 在 390×844、820×1180、1180×820 viewport 覆蓋重選、快速連點、鍵盤確認、焦點、無音訊辨識及控件尺寸／水平溢位。DOM focused suites 32/32 passed；viewport E2E 6/6 passed。WebKit viewport screenshots 位於 ignored `test-results/m1-02/webkit-{iphone-portrait,ipad-portrait,ipad-landscape}.png`，經 Review 視覺檢查，三個尺寸均顯示卡片、選取勾號及主要按鈕，未見裁切／重疊。**AC-12.2／NFR-AC-02.2 的實機 Safari 與實際工具列／安全區操作尚未驗證**；Playwright viewport 與 CSS safe-area 支援不能代替 iPhone／iPad 真機檢查。兒童／家長試玩亦未執行；M1-08／M3-05 仍需記錄裝置證據。
 
 ### M1-03 — 公平 Computer 單回合接線
 
@@ -406,6 +407,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M1-02 — 三大手勢卡與 Touch-First 介面`。** M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-03 — 公平 Computer 單回合接線`。** M1-02 的實作與自動化 viewport 驗證已完成；M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
 **目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
