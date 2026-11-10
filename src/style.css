@@ -99,7 +99,15 @@ figure > p {
 
 .gesture-card__symbol {
   font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: 800;
   line-height: 1.15;
+}
+
+.gesture-card__artwork {
+  display: block;
+  width: clamp(4rem, 20vw, 5rem);
+  height: clamp(2.65rem, 13vw, 3.3rem);
+  object-fit: contain;
 }
 
 .gesture-card__gesture {
@@ -128,6 +136,34 @@ figure > p {
 
 .gesture-selection > button:not(.gesture-card) {
   grid-column: 1 / -1;
+}
+
+.construction-scene {
+  display: block;
+  width: 100%;
+  max-height: 9rem;
+  object-fit: cover;
+  border: 2px solid #c59a5c;
+  border-radius: 1rem;
+  background: #cdebf0;
+}
+
+.reveal-characters {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: clamp(0.75rem, 7vw, 3rem);
+  min-height: 6rem;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(#d9eff0 0 68%, #e8c98e 68%);
+}
+
+.reveal-characters img {
+  display: block;
+  width: min(38%, 15rem);
+  height: clamp(5rem, 23vw, 9rem);
+  object-fit: contain;
 }
 
 @media (min-width: 48rem) {

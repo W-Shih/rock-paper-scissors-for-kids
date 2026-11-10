@@ -4,6 +4,7 @@ import { gestures, playableCharacters, type Gesture } from './rps-domain';
 import { createRoundController, type RoundControllerOptions, type RoundEvent } from './round-controller';
 import { createTogetherMedia } from './together-media';
 import { createGestureSelection } from './gesture-selection';
+import { characterArtwork, constructionSceneArtwork } from './character-assets';
 
 function gestureLabel(gesture: Gesture) {
   const character = playableCharacters[gesture];
@@ -29,6 +30,13 @@ export function createComputerApp(options: Partial<RoundControllerOptions> = {},
     const state = controller.getState();
     const heading = document.createElement('h2'); heading.tabIndex = -1;
     heading.textContent = bilingual('電腦對戰原型', 'Computer play spike'); element.append(heading);
+    const scene = document.createElement('img');
+    scene.className = 'construction-scene';
+    scene.src = constructionSceneArtwork;
+    scene.dataset.scene = 'construction-site';
+    scene.alt = '';
+    scene.setAttribute('aria-hidden', 'true');
+    element.append(scene);
     if (state.phase === 'choosing-p1') {
       const prompt = document.createElement('p'); prompt.textContent = bilingual('選擇你的手勢', 'Choose your gesture'); element.append(prompt);
       element.append(createGestureSelection(state.player1Selection));
@@ -45,11 +53,20 @@ export function createComputerApp(options: Partial<RoundControllerOptions> = {},
       outcome.textContent = result.outcome === 'win' ? bilingual('你贏了！', 'You win!')
         : result.outcome === 'lose' ? bilingual('這次電腦贏了。再試一次吧！', 'The computer wins this time. Try again!')
           : bilingual('平手！', "It's a tie!");
+      const characters = document.createElement('div'); characters.className = 'reveal-characters';
+      for (const gesture of [result.player1Gesture, result.player2Gesture]) {
+        const artwork = document.createElement('img');
+        artwork.src = characterArtwork[gesture];
+        artwork.dataset.characterKey = gesture;
+        artwork.alt = '';
+        artwork.setAttribute('aria-hidden', 'true');
+        characters.append(artwork);
+      }
       const hands = document.createElement('p'); hands.textContent = `${bilingual('你', 'Player 1')}: ${gestureLabel(result.player1Gesture)} ↔ ${bilingual('電腦', 'Computer')}: ${gestureLabel(result.player2Gesture)}`;
       const caption = document.createElement('figcaption');
       if (result.ruleId === 'tie') caption.textContent = bilingual('平手！一起開心揮手。', "It's a tie! Wave happily together.");
       else { const rule = learnRuleContent[result.ruleId]; caption.textContent = `${bilingual(rule.zh, rule.en)} ${bilingual(rule.causeZh, rule.causeEn)}`; }
-      figure.append(outcome, hands, caption); element.append(figure);
+      figure.append(characters, outcome, hands, caption); element.append(figure);
       if (state.phase === 'reveal' && state.presentation === 'static') button(bilingual('看完了', 'Finished watching'), 'finish');
       if (state.phase === 'complete') {
         const status = document.createElement('p'); status.setAttribute('role', 'status'); status.textContent = bilingual('完成一局！', 'Round complete!'); element.append(status);

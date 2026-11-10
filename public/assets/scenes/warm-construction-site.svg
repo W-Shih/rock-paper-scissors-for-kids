@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220" viewBox="0 0 720 220" role="img">
+  <title>A calm construction site in warm daylight</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#cdebf0"/><stop offset="1" stop-color="#fff0cd"/></linearGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h720v220H0Z"/>
+  <circle fill="#ffd36b" cx="625" cy="50" r="28"/>
+  <g fill="#fffaf0" opacity=".9"><path d="M92 54q5-18 24-12 12-18 31-4 23-3 22 16Z"/><path d="M424 34q4-13 18-9 9-13 22-3 18-2 17 12Z"/></g>
+  <path fill="#d7e6c5" d="M0 151q115-35 224 1 116-42 231-2 123-39 265 2v68H0Z"/>
+  <path fill="#e4bd7b" d="M0 175q190-20 360 0t360-1v46H0Z"/>
+  <g data-layer="shallow-excavation">
+    <path fill="#d3a86e" stroke="#b68953" stroke-width="4" d="M265 166q26-22 58-6 56-17 92 1 26-12 51 5l-21 25q-80 17-158-1Z"/>
+    <path fill="#ad8051" stroke="#9c7147" stroke-width="3" d="M287 171q45-16 82-2 43-12 72 3l-18 17q-65 12-121-1Z"/>
+    <path fill="#f2d59c" d="M275 165q22-17 42-8l-15 7Zm155 0q17-9 31 1l-20 3Z"/>
+    <path fill="#c5955b" d="m309 186 12 8h92l12-8q-57 10-116 0Z"/>
+  </g>
+  <g stroke="#af8550" stroke-width="4" stroke-linejoin="round">
+    <path fill="#eac77e" d="M64 96h82v66H64Z"/><path fill="#f1d79e" d="M76 108h20v22H76Zm37 0h20v22h-20Z"/>
+    <path fill="#dbad62" d="M548 107h52v55h-52Z"/><path fill="#f7e1a8" d="M557 117h13v17h-13Zm23 0h13v17h-13Z"/>
+    <path fill="#d8a653" d="m536 107 38-22 38 22"/>
+  </g>
+  <g fill="#e9f0de" stroke="#a6b99a" stroke-width="3"><path d="M188 150q-8-26 9-28 14 5 4 29m20-1q-6-20 9-24 13 9 2 27"/><path d="M650 163q-7-24 9-27 14 8 4 27"/></g>
+  <path fill="#f4a94c" d="M280 159h34l-17-31Z"/><path fill="#fff7e7" d="M293 148h8l-4-10Z"/>
+  <path fill="#f4a94c" d="M416 159h34l-17-31Z"/><path fill="#fff7e7" d="M429 148h8l-4-10Z"/>
+</svg>
