@@ -41,6 +41,15 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.parent-entry {
+  min-height: 40px;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #8d806e;
+  color: #655c50;
+  background: transparent;
+  font-size: 0.85rem;
+}
+
 figure {
   margin: 1rem 0;
   padding: 1rem;
