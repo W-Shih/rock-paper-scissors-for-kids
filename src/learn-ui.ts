@@ -4,6 +4,7 @@ import { createPlaceholder } from './placeholder';
 import { masteryRuleIds } from './rps-domain';
 import { createRoundController, type RoundControllerOptions, type RoundEvent } from './round-controller';
 import { gestures, playableCharacters, type Gesture } from './rps-domain';
+import { createGestureCard } from './gesture-card';
 
 function gestureLabel(gesture: Gesture): string {
   const character = playableCharacters[gesture];
@@ -40,11 +41,16 @@ export function createLearnApp(options: Partial<RoundControllerOptions> = {}, on
     return control;
   }
   function render() {
-    const focusedAction = element.contains(document.activeElement) && document.activeElement instanceof HTMLElement
+    const shouldRestoreFocus = element.contains(document.activeElement);
+    const focusedAction = shouldRestoreFocus && document.activeElement instanceof HTMLElement
       ? document.activeElement.dataset.action : undefined;
     screen.replaceChildren();
     const state = controller.getState();
     const progress = controller.getProgress();
+    const title = document.createElement('h2');
+    title.tabIndex = -1;
+    title.textContent = bilingual('學習', 'Learn');
+    screen.append(title);
     if (state.phase === 'home') {
       button(bilingual('學習', 'Learn'), 'start');
       if (onTogether) button(bilingual('親子原型', 'Together spike'), 'together');
@@ -60,13 +66,18 @@ export function createLearnApp(options: Partial<RoundControllerOptions> = {}, on
             ? bilingual('再看看三種手勢，試試別的選擇。', 'Look at the three gestures and try another choice.')
             : bilingual('慢慢想，哪個手勢能贏對手呢？', 'Take your time. Which gesture can beat the opponent?'), true);
         }
-        for (const gesture of gestures) {
-          const character = playableCharacters[gesture];
-          const card = button(`${gestureLabel(gesture)} · ${bilingual(character.vehicleZh, character.vehicleEn)}`, `select-${gesture}`);
-          card.setAttribute('aria-pressed', String(state.player1Selection === gesture));
-        }
-        button(bilingual('確認', 'Confirm'), 'confirm', !state.player1Selection);
-        button(bilingual('直接看示範', 'Show demonstration'), 'demo');
+        const choices = document.createElement('div');
+        choices.className = 'gesture-selection';
+        choices.setAttribute('aria-label', bilingual('選擇手勢', 'Choose a gesture'));
+        for (const gesture of gestures) choices.append(createGestureCard(gesture, state.player1Selection === gesture));
+        const confirm = document.createElement('button');
+        confirm.type = 'button'; confirm.textContent = bilingual('確認', 'Confirm');
+        confirm.dataset.action = 'confirm'; confirm.disabled = !state.player1Selection;
+        choices.append(confirm);
+        const showDemo = document.createElement('button');
+        showDemo.type = 'button'; showDemo.textContent = bilingual('直接看示範', 'Show demonstration');
+        showDemo.dataset.action = 'demo'; choices.append(showDemo);
+        screen.append(choices);
       } else if (state.phase === 'reveal' || state.phase === 'complete') {
         const result = state.result!;
         if (result.ruleId !== 'tie') {
@@ -104,7 +115,10 @@ export function createLearnApp(options: Partial<RoundControllerOptions> = {}, on
     paragraph(bilingual(`已解鎖收藏：${progress.unlockedCollectibleIds.length}/3`, `Collectibles unlocked: ${progress.unlockedCollectibleIds.length}/3`));
     const warning = controller.getStorageWarning();
     if (warning) paragraph(bilingual(warning.zh, warning.en), true);
-    if (focusedAction) Array.from(screen.querySelectorAll('button')).find((control) => control.dataset.action === focusedAction)?.focus();
+    if (shouldRestoreFocus) {
+      const replacement = Array.from(screen.querySelectorAll('button')).find((control) => control.dataset.action === focusedAction);
+      (replacement ?? title).focus();
+    }
   }
 
   function onClick(event: Event) {
