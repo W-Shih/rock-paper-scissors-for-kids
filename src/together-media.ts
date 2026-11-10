@@ -36,9 +36,14 @@ export function createTogetherMedia(screen: HTMLElement): RoundMedia {
     };
     const later = (callback: () => void, delay: number) => timers.push(window.setTimeout(() => { if (active) callback(); }, delay));
     if (effect.phase === 'countdown') {
-      const beat = document.createElement('p'); beat.className = 'countdown-beat'; beat.setAttribute('aria-hidden', 'true'); beat.textContent = '3'; screen.append(beat);
-      later(() => { beat.textContent = '2'; }, 1000);
-      later(() => { beat.textContent = '1'; }, 2000);
+      const beat = document.createElement('p'); beat.className = 'countdown-beat countdown-beat--pop'; beat.setAttribute('aria-hidden', 'true'); beat.textContent = '3'; screen.append(beat);
+      const showBeat = (text: string) => {
+        beat.textContent = text;
+        beat.classList.toggle('countdown-beat--pop');
+      };
+      later(() => { showBeat('2'); }, 1000);
+      later(() => { showBeat('1'); }, 2000);
+      later(() => { showBeat(bilingual('準備，開始！', 'Ready, Set, Go!')); }, 2500);
       later(() => settle('MEDIA_FINISHED'), 3000);
     } else if (effect.phase === 'approach') {
       try {

@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('Computer keeps its injected choice secret until reveal and shows the matching rule result', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.clock.install();
   await page.addInitScript(() => { Math.random = () => 0.4; });
   await page.goto('/');
   await page.getByRole('button', { name: '比賽 / Play' }).click();
@@ -10,6 +11,16 @@ test('Computer keeps its injected choice secret until reveal and shows the match
   await page.getByRole('button', { name: /^✊/ }).click();
   await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
   await expect(screen.getByRole('status')).toContainText('Ready, Set, Go!');
+  const countdownBeat = screen.locator('.countdown-beat');
+  await expect(countdownBeat).toHaveText('3');
+  await page.clock.fastForward(1000);
+  await expect(countdownBeat).toHaveText('2');
+  await page.clock.fastForward(1000);
+  await expect(countdownBeat).toHaveText('1');
+  await page.clock.fastForward(500);
+  await expect(countdownBeat).toHaveText('準備，開始！ / Ready, Set, Go!');
+  await page.clock.fastForward(500);
+  await expect(screen.getByRole('figure')).toHaveCount(0);
   expect(await screen.innerHTML()).not.toMatch(/✌️|剪刀|Scissors|Snip-Snip|aria-label=".*(?:scissors|paper)/i);
   await expect(screen.getByRole('img', { name: '兩位選手前往中央 / Both players approach the centre' })).toBeVisible();
   expect(await screen.innerHTML()).not.toMatch(/✌️|剪刀|Scissors|Snip-Snip/);

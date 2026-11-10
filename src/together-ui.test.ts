@@ -45,6 +45,19 @@ test('handoff waits for P2 and cancel or safe reload cannot recover the confirme
   expect(reloaded.screen.querySelector('[aria-pressed="true"]')).toBeNull();
 });
 
+test('leaving during the shared countdown cancels its remaining timer beats', async () => {
+  vi.useFakeTimers();
+  const { screen, click } = mount(); choosePair(click);
+  expect(screen.querySelector('.countdown-beat')?.textContent).toBe('3');
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(screen.querySelector('.countdown-beat')?.textContent).toBe('2');
+  click('回首頁 / Home');
+  await vi.advanceTimersByTimeAsync(10000);
+  expect(screen.querySelector('.countdown-beat')).toBeNull();
+  expect(screen.querySelector('svg.together-track')).toBeNull();
+  expect(vi.getTimerCount()).toBe(0);
+});
+
 test('countdown precedes reveal; missing animation API gives the correct static result', async () => {
   vi.useFakeTimers();
   const { screen, click } = mount();
@@ -60,6 +73,32 @@ test('countdown precedes reveal; missing animation API gives the correct static 
   const oldReplay = getByRole(screen, 'button', { name: '再玩一次 / Play again' });
   fireEvent.click(oldReplay); fireEvent.click(oldReplay);
   expect(screen.querySelector('[aria-pressed="true"]')).toBeNull();
+});
+
+test('shared countdown presents 3, 2, 1, then Ready, Set, Go in order', async () => {
+  vi.useFakeTimers(); const animations = animateBoundary();
+  const { screen, click } = mount();
+  click(/^✊/); click('確認 / Confirm'); click('玩家 2 準備好了 / Player 2 is ready');
+  click(/^✌️/); click('確認 / Confirm');
+  const beat = () => screen.querySelector<HTMLElement>('.countdown-beat')?.textContent;
+  expect(beat()).toBe('3');
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(beat()).toBe('2');
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(beat()).toBe('1');
+  await vi.advanceTimersByTimeAsync(500);
+  expect(beat()).toBe('準備，開始！ / Ready, Set, Go!');
+  expect(queryByRole(screen, 'figure')).toBeNull();
+  await vi.advanceTimersByTimeAsync(500);
+  expect(queryByRole(screen, 'figure')).toBeNull();
+  expect(screen.querySelector('svg.together-track')).toBeTruthy();
+  animations[0]!.resolve();
+  await Promise.resolve();
+  expect(screen.textContent).toContain('一起到中央揭曉！');
+  expect(queryByRole(screen, 'figure')).toBeNull();
+  animations[1]!.resolve();
+  await Promise.resolve();
+  expect(getByRole(screen, 'figure').textContent).toContain('Rock beats scissors!');
 });
 
 const pairs = [
