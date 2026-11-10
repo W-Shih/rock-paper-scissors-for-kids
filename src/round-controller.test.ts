@@ -164,7 +164,40 @@ describe('round controller', () => {
   });
 
   test('computer choice maps injected random values uniformly by bucket', () => {
-    expect([0, 0.34, 0.67].map((value) => chooseComputerGesture(() => value))).toEqual(['rock', 'scissors', 'paper']);
+    expect([0, 1 / 3, 2 / 3].map((value) => chooseComputerGesture(() => value))).toEqual(['rock', 'scissors', 'paper']);
     expect(() => chooseComputerGesture(() => 1)).toThrow(RangeError);
+  });
+
+  test.each([
+    ['rock', 'rock', 'tie'], ['rock', 'scissors', 'win'], ['rock', 'paper', 'lose'],
+    ['scissors', 'rock', 'lose'], ['scissors', 'scissors', 'tie'], ['scissors', 'paper', 'win'],
+    ['paper', 'rock', 'win'], ['paper', 'scissors', 'lose'], ['paper', 'paper', 'tie'],
+  ] as const)('Computer confirms %s against random choice %s as %s independently', (player, computer, outcome) => {
+    const randomValues = { rock: 0, scissors: 0.4, paper: 0.8 } as const;
+    let draws = 0;
+    const { controller } = harness(() => { draws++; return randomValues[computer]; });
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: player });
+    expect(draws).toBe(0);
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(draws).toBe(1);
+    expect(controller.getState().result).toMatchObject({ player1Gesture: player, player2Gesture: computer, outcome });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(draws).toBe(1);
+  });
+
+  test('Computer replay draws a fresh independent choice for the next round', () => {
+    const values = [0, 0.8]; let draws = 0;
+    const { controller, completeCurrent } = harness(() => values[draws++]!);
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'rock' });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(controller.getState().result).toMatchObject({ player1Gesture: 'rock', player2Gesture: 'rock', outcome: 'tie' });
+    completeCurrent(); completeCurrent(); completeCurrent();
+    controller.dispatch({ type: 'REPLAY' });
+    controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture: 'rock' });
+    controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+    expect(draws).toBe(2);
+    expect(controller.getState().result).toMatchObject({ player1Gesture: 'rock', player2Gesture: 'paper', outcome: 'lose' });
   });
 });

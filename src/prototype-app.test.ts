@@ -15,13 +15,15 @@ test('home offers bilingual destinations and opens the Learn prototype', () => {
   } finally { app.dispose(); app.element.remove(); }
 });
 
-test('Play offers Computer and Together, clearly marks the unfinished Computer mode, and Together returns home', () => {
+test('Play opens the playable Computer prototype and Together still returns home', () => {
   const app = createPrototypeApp(); document.body.append(app.element);
   try {
     fireEvent.click(getByRole(app.element, 'button', { name: '比賽 / Play' }));
     fireEvent.click(getByRole(app.element, 'button', { name: '電腦 / Computer' }));
-    expect(getByRole(app.element, 'status').textContent).toMatch(/原型|prototype/i);
-    fireEvent.click(getByRole(app.element, 'button', { name: '返回 / Back' }));
+    expect(getByRole(app.element, 'region', { name: '電腦對戰原型 / Computer play spike' })).toBeTruthy();
+    expect(getByRole(app.element, 'button', { name: /^✊/ })).toBeTruthy();
+    fireEvent.click(getByRole(app.element, 'button', { name: '回首頁 / Home' }));
+    fireEvent.click(getByRole(app.element, 'button', { name: '比賽 / Play' }));
     fireEvent.click(getByRole(app.element, 'button', { name: '親子 / Together' }));
     expect(getByRole(app.element, 'region', { name: /親子流程原型|Together flow spike/ })).toBeTruthy();
     fireEvent.click(getByRole(app.element, 'button', { name: '回首頁 / Home' }));
