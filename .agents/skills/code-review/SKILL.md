@@ -48,14 +48,23 @@ On top of whatever the repo documents, the Standards axis always carries the **s
 - **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag, suppress the smell.
 - **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation. Like any standard here, skip anything tooling already enforces.
 
-Each smell reads *what it is* → *how to fix*; match it against the diff:
+#### Duplication and principle priority
+
+Distinguish **implementation duplication** from **semantic duplication** before proposing DRY or refactoring findings:
+
+- **Implementation duplication**: similar syntax, control flow, or code shape serving independent domain rules or responsibilities that may change separately. Similarity alone is insufficient evidence for a DRY or refactoring recommendation; keep independent concepts separate.
+- **Semantic duplication**: the same domain knowledge, rule, invariant, or decision has multiple authoritative implementations that must change together for the same reason, even when their code looks different. Establish this from the approved spec, domain responsibilities, callers, tests, or change history; do not infer it solely from matching code.
+- For confirmed semantic duplication, evaluate a proportionate refactoring that gives the shared knowledge one authoritative representation. Prefer a small shared function, data definition, or owning module that preserves behavior and responsibility boundaries. Explain the duplicated rule, affected locations, evidence that they must change together, drift risk, and the proposed scope and tradeoffs. When evidence is insufficient, state the uncertainty rather than report a confirmed DRY finding.
+- **DRY takes priority over KISS and YAGNI when these principles conflict over confirmed semantic duplication.** Do not dismiss an evidenced shared-rule problem solely because keeping copies looks simpler or extraction adds an abstraction. Use KISS and YAGNI to choose the smallest sufficient refactoring, without speculative extension points. Priority does not turn every DRY finding into a blocker; severity follows demonstrated impact and risk, and approved behavior and constitutional constraints remain binding.
+
+Each smell reads *what it is* → *how to fix*; match it against the diff using the duplication criteria above:
 
 - **Mysterious Name**: a function, variable, or type whose name doesn't reveal what it does or holds. → rename it; if no honest name comes, the design's murky.
-- **Duplicated Code**: the same logic shape appears in more than one hunk or file in the change. → extract the shared shape, call it from both.
+- **Duplicated Code**: confirmed semantic duplication across multiple locations, whether or not the code has the same shape. → evaluate consolidating the shared knowledge under the duplication criteria above.
 - **Feature Envy**: a method that reaches into another object's data more than its own. → move the method onto the data it envies.
 - **Data Clumps**: the same few fields or params keep travelling together (a type wanting to be born). → bundle them into one type, pass that.
 - **Primitive Obsession**: a primitive or string standing in for a domain concept that deserves its own type. → give the concept its own small type.
-- **Repeated Switches**: the same `switch`/`if`-cascade on the same type recurs across the change. → replace with polymorphism, or one map both sites share.
+- **Repeated Switches**: recurring `switch`/`if` cascades encode the same decision rule in multiple places. → apply the duplication criteria above; if semantic duplication is confirmed, evaluate one shared decision function or map, using polymorphism only when existing responsibilities justify it. Switching on the same type for independent decisions is insufficient evidence.
 - **Shotgun Surgery**: one logical change forces scattered edits across many files in the diff. → gather what changes together into one module.
 - **Divergent Change**: one file or module is edited for several unrelated reasons. → split so each module changes for one reason.
 - **Speculative Generality**: abstraction, parameters, or hooks added for needs the spec doesn't have. → delete it; inline back until a real need shows.
@@ -75,7 +84,7 @@ Issue both sub-agent calls together, in the foreground, and aggregate the report
 **Standards sub-agent prompt** should include:
 
 - The review mode and shared snapshot path from step 1, including capture commands and the commit list where applicable.
-- The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full (the sub-agent has no other access to it).
+- The list of standards-source files you found in step 3, **plus the smell baseline and Duplication and principle priority criteria from step 3** pasted in full (the sub-agent has no other access to them).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** should include:
