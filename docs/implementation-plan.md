@@ -223,6 +223,7 @@
 - **交付**：`rock-beats-scissors`、`scissors-beats-paper`、`paper-beats-rock`、`tie` 全部分鏡／靜態降級；每種勝負雙站位、三種平手（相同主角）；演出和文字來自 immutable RoundResult，動畫只說明不判定。
 - **驗證／Done**：3×2 勝利方向＋3 平手的視覺檢核與 screenshot／人工紀錄；所有結果的手勢、中英規則句、車車、因果方向均正確，失敗時仍有完整圖文；不因更新素材使 9/9 engine 測試失敗。
 - **追蹤**：FR-02／07；AC-03.1～03.4、AC-08.4；NFR-AC-04.2、08.2。
+- **非阻擋追蹤（P3）**：於補齊結果呈現時，評估以小型 formatter 集中 Computer／Together 共用的規則句與平手 caption，降低共同內容的維護漂移；保留各模式的人稱、結果標題與流程差異。此項為維護性改善候選，不新增產品需求或里程碑驗收條件。來源：[PR #23 Standards 審查建議](https://github.com/W-Shih/rock-paper-scissors-for-kids/pull/23#issuecomment-6758676163)。
 
 ### M2-05 — 完整勝／負／平手情緒回饋與修復
 
