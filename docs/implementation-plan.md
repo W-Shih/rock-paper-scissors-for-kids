@@ -193,6 +193,7 @@
 - **交付**：跑 Computer 端到端流程、故障降級與重玩；真實 iPhone Safari 直向、iPad Safari 直／橫向初測，記錄首次可操作時間、觸控回應、動畫掉格／停頓、開始到結果等待及裝置／OS／測試條件；儘可能進行一次家長／孩子原型試玩，分辨「記得車車」與「理解手勢」。
 - **驗證／Done**：自動化結果、真機觀察與初始效能量測有可查證記錄；未取得設備／觀察則標 `Blocked` 並列明影響，不以 WebKit 仿冒真 Safari。此處只**建立 NFR-03 基準**，不可先宣稱最終效能驗收已通過。
 - **追蹤**：US-02／03／04／06／08／12 代表流程；NFR-AC-01.1、02.1～02.3、03.1；Spec §10.2。
+- **狀態／證據（2026-11-10）**：`Blocked`。Computer 端到端失敗恢復／重播與單次 Chromium／WebKit 診斷計時已有自動化證據，詳見 [M1-08 evidence](m1-08-evidence.md)。無實際 iPhone／iPad Safari、Android 裝置或親子觀察；因此 M1-08 未 Done、M1 Exit gate 關閉，NFR-03 門檻及最終效能驗收未通過／未判定。
 
 **M1 Exit**：有一條完整可玩的公平 Computer 回合、可理解的規則／情緒回饋、失敗退路、可重玩；第一條動畫可在 Safari 實際展示並附量測／試玩觀察與缺口。**FR-07 的四類正式動畫、正式語音／掌聲、完整 Learn／Together 和三台收藏車仍屬 M2／M3，不能於此關卡標記已驗收。**
 
@@ -414,6 +415,6 @@
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M1-08 — Vertical Slice 整合、Safari 初測及效能基線`。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線、M1-04 character art／scene slice、M1-05 共用倒數／中央揭曉／故障回退、M1-06 因果分鏡／靜態替代，以及 M1-07 結果／失利復原／再玩均有自動化證據。M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據；親子試玩與 M1 Exit gate 仍依原計畫。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-08 — Vertical Slice 整合、Safari 初測及效能基線` 仍因缺少真機與親子觀察而維持 Blocked。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線、M1-04 character art／scene slice、M1-05 共用倒數／中央揭曉／故障回退、M1-06 因果分鏡／靜態替代，以及 M1-07 結果／失利復原／再玩均有自動化證據。M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據；親子試玩與 M1 Exit gate 仍依原計畫。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
 **目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。
