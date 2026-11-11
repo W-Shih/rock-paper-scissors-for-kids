@@ -174,6 +174,28 @@ figure > p {
 
 .causal-character-position img { width: 100%; height: 100%; }
 
+.friendly-feedback {
+  margin: 0.75rem 0;
+  padding: 0.5rem;
+  border: 2px solid #c59a5c;
+  border-radius: 1rem;
+  background: #fff7dc;
+  text-align: center;
+}
+.friendly-feedback p { margin: 0.25rem 0; }
+.friendly-friends { display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+.friendly-friend { position: relative; display: inline-flex; flex-direction: column; align-items: center; font-size: clamp(1.5rem, 7vw, 2.5rem); }
+.friendly-friend img { width: clamp(4rem, 20vw, 7rem); height: 4rem; object-fit: contain; }
+.friendly-celebration { position: absolute; top: 0; right: -0.25rem; font-size: 1.25rem; }
+.friendly-care { display: inline-block; font-size: 1.75rem; animation: offer-care 1.8s ease-in-out both; }
+.friendly-friend--recovering { animation: friend-straighten 1.8s ease-in-out both; }
+.friendly-feedback--restored .friendly-friend, .friendly-feedback--restored .friendly-care { animation: none; transform: none; }
+@keyframes friend-straighten { 0%, 25% { transform: rotate(-10deg) translateY(0.2rem); } 75%, 100% { transform: none; } }
+@keyframes offer-care { 0% { transform: scale(0.6); } 45% { transform: scale(1.15); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .friendly-friend, .friendly-care { animation: none !important; transform: none; }
+}
+
 .result-gestures {
   display: flex;
   justify-content: center;

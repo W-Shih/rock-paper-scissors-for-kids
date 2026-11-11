@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { createRoundController, reduceRound, chooseComputerGesture, initialRoundState, type RoundEvent, type RoundMedia, type RoundClock } from './round-controller';
+import { createProgressStore } from './progress-store';
 
 function harness(random = () => 0) {
   const scheduled: Array<{ callback: () => void; cancelled: boolean }> = [];
@@ -17,6 +18,31 @@ function harness(random = () => 0) {
 }
 
 describe('round controller', () => {
+  test('Computer loss, tie, win, replay and Home preserve earned mastery and collectibles', () => {
+    const store = createProgressStore({ getItem: () => null, setItem: () => undefined });
+    store.save({ 'rock-beats-scissors': 3, 'scissors-beats-paper': 2, 'paper-beats-rock': 1 });
+    const earned = store.progress;
+    const notifications: Array<(event: RoundEvent) => void> = [];
+    const controller = createRoundController({ random: () => 0, progressStore: store,
+      clock: { schedule: () => 0, cancel: () => undefined },
+      media: { play(_effect, notify) { notifications.push(notify); } },
+    });
+    controller.dispatch({ type: 'START', mode: 'computer' });
+    for (const [index, gesture] of (['scissors', 'rock', 'paper'] as const).entries()) {
+      const roundId = index + 1;
+      expect(controller.getState()).toMatchObject({ roundId, result: null, player1Selection: null, player2Selection: null });
+      controller.dispatch({ type: 'SELECT_GESTURE', player: 1, gesture });
+      controller.dispatch({ type: 'CONFIRM_SELECTION', player: 1 });
+      for (const phase of ['countdown', 'approach', 'reveal'] as const) notifications.at(-1)!({ type: 'MEDIA_FINISHED', roundId, phase });
+      expect(controller.getState().phase).toBe('complete');
+      expect(controller.getState().result?.outcome).toBe(['lose', 'tie', 'win'][index]);
+      expect(controller.getProgress()).toEqual(earned);
+      controller.dispatch({ type: 'REPLAY' });
+    }
+    controller.dispatch({ type: 'HOME' });
+    expect(controller.getProgress()).toEqual(earned);
+    controller.dispose();
+  });
   test('selection is provisional; confirmation locks one result despite repeated confirmation', () => {
     const { controller } = harness(() => 0.99);
     controller.dispatch({ type: 'START', mode: 'computer' });

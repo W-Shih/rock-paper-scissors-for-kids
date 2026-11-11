@@ -12,6 +12,29 @@ function mount(options: Partial<RoundControllerOptions> = {}) {
   return { app, screen: app.element, click };
 }
 
+test.each([
+  { symbol: '✊', message: '你贏了！太棒了！ / You won! Great job!', ending: '朋友幫忙扶正，大家都好好的 / A friend helps straighten it; everyone is okay' },
+  { symbol: '✌️', message: "沒關係，我們幫車車整理好。 / It's okay. Let's help our truck.", ending: '朋友幫忙扶正，大家都好好的 / A friend helps straighten it; everyone is okay' },
+  { symbol: '✋', message: "平手！再來一次！ / It's a tie! Let's play again!", ending: '一起開心揮手 / Wave happily together' },
+])('completed Computer round gives friendly feedback for $symbol and leaves both characters happy', ({ symbol, message, ending }) => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  // Independently specified win, loss and tie pairings.
+  const random = symbol === '✊' ? 0.4 : symbol === '✌️' ? 0 : 0.8;
+  const { screen, click } = mount({ random: () => random, media: { play(_effect, notify) { notifications.push(notify); } } });
+  click(new RegExp(`^${symbol}`)); click('確認 / Confirm');
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+  const feedback = getByRole(screen, 'region', { name: '友善回饋 / Friendly feedback' });
+  expect(feedback.textContent).toContain(message);
+  expect(feedback.textContent).toContain(ending);
+  expect(feedback.querySelectorAll('img')).toHaveLength(2);
+  notifications[2]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'reveal' });
+  expect(getByRole(screen, 'heading', { name: '完成一局！ / Round complete!' })).toBeTruthy();
+  expect(getByRole(screen, 'img', { name: '兩位朋友都恢復正常、開心的狀態 / Both friends are okay and happy' })).toBeTruthy();
+  expect(getByRole(screen, 'button', { name: '再玩一次 / Play again' })).toBeTruthy();
+  expect(getByRole(screen, 'button', { name: '回首頁 / Home' })).toBeTruthy();
+});
+
 test('Computer shares gesture cards and keeps the opponent neutral until reveal', async () => {
   const notifications: Array<(event: RoundEvent) => void> = [];
   const { screen, click } = mount({ random: () => 0.4, media: { play(_effect, notify) { notifications.push(notify); } } });
@@ -101,6 +124,35 @@ test.each([
   expect(diagram.dataset.winnerPosition ?? null).toBe(position);
   expect(diagram.querySelector('svg')?.textContent).toContain(cause);
   expect(result.querySelector('.static-causal-explanation')?.textContent).toContain(rule);
+  notifications[2]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'reveal' });
+  expect(getByRole(screen, 'heading', { name: '完成一局！ / Round complete!' })).toBeTruthy();
+  expect(getByRole(screen, 'figure').textContent).toContain(rule);
+});
+
+test('replay clears the completed result and delayed notifications cannot complete the next round', () => {
+  const notifications: Array<(event: RoundEvent) => void> = [];
+  const { screen, click } = mount({ random: () => 0, media: { play(_effect, notify) { notifications.push(notify); } } });
+  click(/^✌️/); click('確認 / Confirm');
+  notifications[0]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'countdown' });
+  notifications[1]!({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'approach' });
+  const oldReveal = notifications[2]!;
+  oldReveal({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'reveal' });
+  const oldReplay = getByRole(screen, 'button', { name: '再玩一次 / Play again' });
+  fireEvent.click(oldReplay); fireEvent.click(oldReplay);
+  oldReveal({ type: 'MEDIA_FINISHED', roundId: 1, phase: 'reveal' });
+  expect(queryByRole(screen, 'figure')).toBeNull();
+  expect(getByRole(screen, 'button', { name: '確認 / Confirm' }).hasAttribute('disabled')).toBe(true);
+  click(/^✋/); click('確認 / Confirm');
+  oldReveal({ type: 'MEDIA_FAILED', roundId: 1, phase: 'reveal' });
+  expect(queryByRole(screen, 'figure')).toBeNull();
+  notifications[3]!({ type: 'MEDIA_FINISHED', roundId: 2, phase: 'countdown' });
+  notifications[4]!({ type: 'MEDIA_FINISHED', roundId: 2, phase: 'approach' });
+  notifications[5]!({ type: 'MEDIA_FINISHED', roundId: 2, phase: 'reveal' });
+  expect(getByRole(screen, 'figure').textContent).toContain('You win!');
+  expect(getByRole(screen, 'figure').textContent).not.toContain('The computer wins this time');
+  click('回首頁 / Home');
+  notifications[5]!({ type: 'MEDIA_FINISHED', roundId: 2, phase: 'reveal' });
+  expect(queryByRole(screen, 'figure')).toBeNull();
 });
 
 test('failed character images leave large gestures, the bilingual rule and a self-contained causal diagram', () => {
@@ -132,6 +184,7 @@ test('static media recovery preserves the full cause and does not restart storyb
   const staticStory = screen.querySelector('.causal-storyboard')!;
   expect(staticStory.classList.contains('causal-storyboard--complete')).toBe(true);
   expect(staticStory.querySelector('.storyboard-step--3')?.textContent).toContain('everyone is okay');
+  expect(getByRole(screen, 'img', { name: '兩位朋友都恢復正常、開心的狀態 / Both friends are okay and happy' })).toBeTruthy();
   expect(getByRole(screen, 'figure').textContent).toContain('Rock beats scissors!');
   expect(getByRole(screen, 'button', { name: '看完了 / Finished watching' })).toBeTruthy();
 });

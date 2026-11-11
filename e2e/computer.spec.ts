@@ -2,6 +2,46 @@ import { expect, test } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
+test('Computer completes win, loss and tie with happy recovery, fresh replay and Home', async ({ page }, testInfo) => {
+  const screenshots = join(process.cwd(), 'test-results', 'm1-07');
+  await mkdir(screenshots, { recursive: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.addInitScript(() => { Math.random = () => 0; });
+  await page.goto('/');
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '電腦 / Computer' }).click();
+  const screen = page.getByRole('region', { name: '電腦對戰原型 / Computer play spike' });
+  for (const [symbol, outcome, message] of [
+    ['✌️', 'loss', "It's okay. Let's help our truck."],
+    ['✋', 'win', 'You won! Great job!'],
+    ['✊', 'tie', "It's a tie! Let's play again!"],
+  ]) {
+    await page.getByRole('button', { name: new RegExp(`^${symbol}`) }).click();
+    await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
+    const feedback = screen.getByRole('region', { name: '友善回饋 / Friendly feedback' });
+    await expect(feedback).toContainText(message!);
+    if (outcome === 'loss') {
+      await feedback.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: join(screenshots, `${testInfo.project.name}-recovery.png`) });
+    }
+    await expect(screen.getByRole('heading', { name: '完成一局！ / Round complete!' })).toBeVisible();
+    await expect(screen.getByRole('img', { name: '兩位朋友都恢復正常、開心的狀態 / Both friends are okay and happy' })).toBeVisible();
+    expect(await feedback.locator('.friendly-friend').evaluateAll(friends => friends.map(friend => getComputedStyle(friend).transform))).toEqual(['none', 'none']);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(screen.getByRole('button', { name: '再玩一次 / Play again' })).toBeInViewport({ ratio: 1 });
+    await expect(screen.getByRole('button', { name: '回首頁 / Home' })).toBeInViewport({ ratio: 1 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: join(screenshots, `${testInfo.project.name}-complete-${outcome}.png`), fullPage: true });
+    await screen.getByRole('button', { name: '再玩一次 / Play again' }).click();
+    await expect(screen.getByRole('figure')).toHaveCount(0);
+    await expect(screen.getByRole('button', { name: '確認 / Confirm', exact: true })).toBeDisabled();
+  }
+  await screen.getByRole('button', { name: '回首頁 / Home' }).click();
+  await expect(page.getByRole('button', { name: '比賽 / Play' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test('Computer keeps its injected choice secret until reveal and shows the matching rule result', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
