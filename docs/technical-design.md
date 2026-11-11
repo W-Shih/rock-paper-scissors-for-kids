@@ -89,7 +89,7 @@ Browser (iPad / iPhone Safari first; Android / desktop)
     |
     | HTTPS: HTML, hashed JS/CSS, SVG/images, owned audio files
     v
-Static hosting / CDN (provider undecided)
+Static hosting / CDN (Sites for M1 HTTPS trial; release provider reviewed in M3)
     |
     +-- Client-only Vanilla TypeScript SPA
           |
@@ -102,6 +102,7 @@ Static hosting / CDN (provider undecided)
 
 - **執行時無產品 API 呼叫**：預設不需伺服器 Session、帳號、Analytics SDK、外部字型／CDN 即時請求或兒童行為追蹤。程式與媒體資產盡量由同一受控 HTTPS origin 供應；部署商選擇屬實作計畫與部署階段的決定。
 - **同源儲存邊界**：學習進度只存在該 origin 的瀏覽器本機；改域名、清除網站資料、換瀏覽器或裝置不保證保留（Spec §7.2）。
+- **M1 試玩部署（2026-11-10）**：使用者要求提前建立免登入 HTTPS 測試網址，採 Sites 靜態託管；沿用 Vanilla/Vite 產物，不改遊戲需求。設定、來源與線上驗證見 [測試部署紀錄](test-deployment.md)，真機表見 [M1-08 紀錄表](m1-08-device-record.md)。測試部署不代表 M3 正式發布或任何未執行的真機驗收已通過。
 - **不依賴 Service Worker**：正常線上載入即可；離線與安裝提示不是 MVP。部署時確認靜態資產路徑及快取版本一致，避免舊 HTML 引用已刪除的資產。
 - **安全邊界**：不接觸攝影機、麥克風、定位 API。不要把孩子資料或遊戲狀態送進 third-party error tracker；如需測試紀錄，只使用人工／本地非個資資料，符合 NFR-05。
 
