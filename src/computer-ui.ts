@@ -30,14 +30,19 @@ export function createComputerApp(options: Partial<RoundControllerOptions> = {},
     element.replaceChildren();
     const state = controller.getState();
     const heading = document.createElement('h2'); heading.tabIndex = -1;
-    heading.textContent = bilingual('電腦對戰原型', 'Computer play spike'); element.append(heading);
+    heading.textContent = state.phase === 'complete' ? bilingual('完成一局！', 'Round complete!')
+      : bilingual('電腦對戰原型', 'Computer play spike'); element.append(heading);
     const scene = document.createElement('img');
     scene.className = 'construction-scene';
     scene.src = constructionSceneArtwork;
     scene.dataset.scene = 'construction-site';
     scene.alt = '';
     scene.setAttribute('aria-hidden', 'true');
-    element.append(scene);
+    if (state.phase !== 'complete') element.append(scene);
+    if (state.phase === 'complete') {
+      button(bilingual('再玩一次', 'Play again'), 'replay');
+      button(bilingual('回首頁', 'Home'), 'home');
+    }
     if (state.phase === 'choosing-p1') {
       const prompt = document.createElement('p'); prompt.textContent = bilingual('選擇你的手勢', 'Choose your gesture'); element.append(prompt);
       element.append(createGestureSelection(state.player1Selection));
@@ -97,16 +102,16 @@ export function createComputerApp(options: Partial<RoundControllerOptions> = {},
       }
       caption.classList.add('static-causal-explanation');
       const causalDiagram = createCausalDiagram(result, winnerPosition);
-      figure.append(largeGestures, outcome, caption, characters, hands);
+      const restored = state.phase === 'complete' || state.presentation === 'static' || characterArtworkFailed;
+      figure.append(largeGestures, outcome, caption, createFriendlyFeedback(result, winnerPosition, restored, characterArtworkFailed), characters, hands);
       if (cause.textContent) figure.append(cause);
       figure.append(causalDiagram); element.append(figure);
       if (state.phase === 'reveal' && state.presentation === 'static') button(bilingual('看完了', 'Finished watching'), 'finish');
       if (state.phase === 'complete') {
         const status = document.createElement('p'); status.setAttribute('role', 'status'); status.textContent = bilingual('完成一局！', 'Round complete!'); element.append(status);
-        button(bilingual('再玩一次', 'Play again'), 'replay');
       }
     }
-    button(bilingual('回首頁', 'Home'), 'home');
+    if (state.phase !== 'complete') button(bilingual('回首頁', 'Home'), 'home');
     if (hadFocus) (Array.from(element.querySelectorAll('button')).find(b => b.dataset.action === action) ?? heading).focus();
   }
   function onClick(event: Event) {
@@ -129,6 +134,47 @@ export function createComputerApp(options: Partial<RoundControllerOptions> = {},
   controller.dispatch({ type: 'START', mode: 'computer' });
   render();
   return { element, dispose() { element.removeEventListener('click', onClick); unsubscribe(); controller.dispose(); element.replaceChildren(); } };
+}
+
+function createFriendlyFeedback(result: RoundResult, winnerPosition: 'left' | 'right' | null, restored: boolean, artworkFailed: boolean) {
+  const feedback = document.createElement('section');
+  feedback.className = `friendly-feedback${restored ? ' friendly-feedback--restored' : ''}`;
+  feedback.setAttribute('aria-label', bilingual('友善回饋', 'Friendly feedback'));
+  const message = document.createElement('p');
+  message.textContent = result.outcome === 'win' ? bilingual('你贏了！太棒了！', 'You won! Great job!')
+    : result.outcome === 'lose' ? bilingual('沒關係，我們幫車車整理好。', "It's okay. Let's help our truck.")
+      : bilingual('平手！再來一次！', "It's a tie! Let's play again!");
+  const friends = document.createElement('div'); friends.className = 'friendly-friends';
+  friends.setAttribute('role', 'img');
+  friends.setAttribute('aria-label', restored
+    ? bilingual('兩位朋友都恢復正常、開心的狀態', 'Both friends are okay and happy')
+    : result.outcome === 'tie' ? bilingual('兩位朋友一起開心揮手', 'Both friends wave happily together')
+      : bilingual('朋友送上關心，幫失利車扶正、恢復笑容', 'A friend offers care and helps the other truck straighten up and smile'));
+  [result.player1Gesture, result.player2Gesture].forEach((gesture, index) => {
+    const friend = document.createElement('span'); friend.className = 'friendly-friend';
+    const loser = winnerPosition !== null && index === (winnerPosition === 'left' ? 1 : 0);
+    if (loser) friend.classList.add('friendly-friend--recovering');
+    friend.setAttribute('aria-hidden', 'true');
+    if (!artworkFailed) {
+      const artwork = document.createElement('img'); artwork.src = characterArtwork[gesture]; artwork.alt = '';
+      artwork.addEventListener('error', () => artwork.remove(), { once: true });
+      friend.append(artwork);
+    }
+    const smile = document.createElement('span'); smile.textContent = `${playableCharacters[gesture].symbol} 🙂`; friend.append(smile);
+    if (!loser && result.outcome !== 'tie') {
+      const celebration = document.createElement('span'); celebration.className = 'friendly-celebration'; celebration.textContent = '✨'; friend.append(celebration);
+    }
+    if (index === 1) {
+      const care = document.createElement('span'); care.className = 'friendly-care'; care.setAttribute('aria-hidden', 'true');
+      care.textContent = result.outcome === 'tie' ? '👋' : '💛'; friends.append(care);
+    }
+    friends.append(friend);
+  });
+  const ending = document.createElement('p');
+  ending.textContent = result.outcome === 'tie' ? bilingual('一起開心揮手', 'Wave happily together')
+    : bilingual('朋友幫忙扶正，大家都好好的', 'A friend helps straighten it; everyone is okay');
+  feedback.append(message, friends, ending);
+  return feedback;
 }
 
 function createRockScissorsStoryboard(winnerPosition: 'left' | 'right' | null, complete: boolean) {

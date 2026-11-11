@@ -5,6 +5,59 @@ This is the provisional single-package Vite `vanilla-ts` baseline from
 The page now includes the M0-05 bilingual Learn and M0-06 Together flow spikes; formal gameplay
 presentation and M0-GATE remain pending.
 
+## M1-07 result, recovery and replay (2026-11-10)
+
+Computer now has an explicit completed-round heading and immediate Play again /
+Home controls ahead of the detailed result. The locked gestures, outcome and
+bilingual rule remain visible. A friendly feedback panel gives the child a
+win celebration, gentle loss reassurance or a shared tie greeting. A heart
+offers care while the losing character gently straightens up; both friends
+finish smiling in their normal state. Static media recovery and failed artwork
+retain gestures, care and a restored ending without replaying motion. Winner
+sparkles are a static M1 celebration; formal audio and full feedback variations
+remain later tasks. Learn / Together behavior and storage are unchanged.
+
+Traceability: FR-08 / FR-10; AC-04.1–04.3 (partial), AC-06.1–06.4 and
+NFR-AC-04.3. The existing controller owns one result, fresh replay round IDs,
+phase cancellation and stale-event rejection; no extra game-state layer was
+introduced. Tests cover all nine pairs reaching completion, all three outcomes
+retaining earned mastery / collectibles, cleared choices and result on replay,
+detached replay controls, stale callbacks and Home. Existing valid assertions
+were retained; the nine-pair DOM check was extended through completion and the
+static-fallback check now also verifies the happy restored ending.
+
+The authorized seams are the existing controller/media protocol, Computer
+DOM/ARIA and Playwright user flow. Red-green evidence: three outcome cases first
+failed because the friendly-feedback region was absent, then passed; the
+character-recovery visual check first found no character images, then passed
+with the original project-authored art. Existing replay/progress behavior gained
+regression coverage without changing its implementation.
+
+Environment: Windows x64, Node v24.22.2, npm 11.13.0, Playwright 1.65.0. Node
+satisfies the declared range; this local npm differs from pinned npm 10.9.2.
+Required GitHub CI uses the declared npm version and must pass separately.
+
+| Command / check | Observed result |
+| --- | --- |
+| `npm run typecheck` | Exit 0 after each implementation slice and final visual adjustment |
+| `npm test -- src/computer-ui.test.ts src/round-controller.test.ts` | Exit 0; 44/44 focused tests |
+| `npm test` | Exit 0; 111/111 tests across 11 files |
+| Final `npm test -- src/computer-ui.test.ts` | Exit 0; 21/21 after static-fallback assertion and celebration adjustment |
+| `npm run lint` | Exit 0; zero warnings, repeated after final changes |
+| `npm run test:e2e -- e2e/computer.spec.ts` | Exit 0; 6/6 Chromium/WebKit cases, including secrecy and artwork failure |
+| `npm run test:e2e -- e2e/computer.spec.ts -g 'completes win'` | Exit 0; 2/2 on final celebration visual; production build passed |
+| `npm run test:e2e` | Exit 0; production build and 26/26 Chromium/WebKit cases passed on final implementation, including unchanged Learn / Together regressions |
+
+Browser commands used the actual-user context to allow the local preview server
+and installed browsers. Screenshots regenerate in ignored
+`test-results/m1-07/{chromium,webkit}-{recovery,complete-loss,complete-win,complete-tie}.png`.
+Parent visual inspection of the loss and recovery views found the hands, rule,
+care and restored smiles clear, with completed-round actions at the top. These
+are browser viewport observations, not physical Safari or child/parent evidence.
+Independent Standards / Spec review-v2 found zero remaining findings; the bounded P3 placement duplication was repaired and re-reviewed. M1-08 still needs real iPhone / iPad Safari,
+initial performance measurements and parent/child observations; this task does
+not pass M1 Exit, final NFR-03 performance acceptance or release readiness.
+
 ## Reproduce
 
 Use Node **24.22.1** (`.nvmrc`; supported engine: 24.x from 24.22.1) and
@@ -639,3 +692,34 @@ Sol / medium with separate fresh contexts. No model fallback was required.
   Spec review Sol high. Both independent review-v2 axes found zero remaining
   findings; no model fallback was needed. The parent inspected refreshed narrow
   left/right and image-failure views and confirmed the corrections.
+
+## M1-07 Standards review follow-up (2026-11-10)
+
+- Source: `M1-07 review-v1 (PR pending)`, frozen WIP based on
+  `9e6008ecdc535f4524e6de8b602f04826359ead9`; axis: Standards; priority: P3;
+  status: pending bounded maintenance repair, not a product-scope deferral.
+- Locations in the frozen snapshot: `src/computer-ui.ts:57` and `:155`.
+  The renderer maps the locked outcome to `winnerPosition`, while the new
+  friendly-feedback helper independently maps that same outcome to the loser's
+  array index. Both describe the same pair's winner/loser placement: player 1
+  occupies the left/first slot and player 2 the right/second slot. AC-04.2's
+  recovering character must agree with the winner shown by the storyboard and
+  causal diagram. The nine-pair presentation checks and the prior M1-06 repair
+  corroborate this shared responsibility. A later placement change must keep
+  both mappings synchronized or the happy-recovery panel can repair a different
+  participant from the loser shown elsewhere. No current wrong result was found.
+- Classification: maintainability judgment, confirmed semantic duplication /
+  Duplicated Code; not a hard documented-standard violation. AGENTS.md's design
+  and iterative-design guidance supports a proportionate consolidation.
+- Resolution (2026-11-10): `createFriendlyFeedback` receives the renderer's
+  `winnerPosition` and derives the recovering participant from that placement;
+  ties still have no recovering participant. No test assertions were changed.
+- Validation: `npm run typecheck`, `npm run lint`, and
+  `npm test -- src/computer-ui.test.ts` passed (21/21). The focused
+  `npm run test:e2e -- e2e/computer.spec.ts` passed all 6 Chromium/WebKit cases,
+  including both winner positions and image-failure fallback. The e2e command
+  also completed its production build successfully.
+- Status: resolved; ready for independent re-review. Physical Safari and
+  child/parent acceptance remain outside this bounded maintenance repair.
+
+Model routing for M1-07: implementation Sol medium; bounded review repair Luna medium; independent Standards Sol medium and Spec Sol high (child-experience recovery). No fallback was required. Review-v2 retained unchanged review-v1 coverage and verified the repair; both axes reported zero remaining findings.
