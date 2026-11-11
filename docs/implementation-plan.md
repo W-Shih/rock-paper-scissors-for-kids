@@ -189,6 +189,9 @@
 
 ### M1-08 — Vertical Slice 整合、Safari 初測及效能基線
 
+- **測試部署準備（2026-11-10）**：依使用者要求，將 HTTPS 試玩部署提前至本任務，供真機取證；使用者選擇免登入連結存取。部署設定與結果見 [測試部署紀錄](test-deployment.md)，待填 [真機驗收紀錄表](m1-08-device-record.md) 已準備。此為工程執行順序調整，不變更產品範圍、Spec 或 M3 Release Gate；真機測試前維持 Blocked。
+- **後續 iPad 人工回報**：使用者回報 iPad Air 第 5 代／iPadOS 17.6.1／Safari 直／橫向 Computer 回合、清空重玩／首頁、版面與定性操作反應均通過，測試網址及逐項範圍見 [真機驗收紀錄](m1-08-device-record.md)。操作時部署版本與其他測試條件未提供；iPhone、量化真機效能及親子觀察尚未驗證，M1-08 維持 `Blocked`、M1 Exit 未通過。原始自動化執行時的未驗證狀態保留為歷史紀錄。
+
 - **前置**：M1-01～M1-07。
 - **交付**：跑 Computer 端到端流程、故障降級與重玩；真實 iPhone Safari 直向、iPad Safari 直／橫向初測，記錄首次可操作時間、觸控回應、動畫掉格／停頓、開始到結果等待及裝置／OS／測試條件；儘可能進行一次家長／孩子原型試玩，分辨「記得車車」與「理解手勢」。
 - **驗證／Done**：自動化結果、真機觀察與初始效能量測有可查證記錄；未取得設備／觀察則標 `Blocked` 並列明影響，不以 WebKit 仿冒真 Safari。此處只**建立 NFR-03 基準**，不可先宣稱最終效能驗收已通過。
@@ -409,12 +412,12 @@
 | 首次正式 SVG 分鏡在 Safari 的成本／效能 | M1-08 量測與試玩 | 保持 SVG baseline；如有不可接受證據依 TD §2.2 小範圍比較，不先引入引擎 |
 | 初版三台額外收藏車的名稱／素材 | M3-03；原創／合法圖像 | Domain 用固定 ID；正式素材與名字不阻塞 M0 |
 | 中文／英文錄音、愛的鼓勵掌聲來源／權利 | M3-02／07；授權或自製紀錄 | 原型用安全 placeholder；**阻塞正式 Release**，不使用未授權錄音 |
-| Static HTTPS hosting 商與部署網址 | M3-07；可直接開啟與 network 稽核 | M0～M2 使用本機開發環境，不假定已上線 |
+| Static HTTPS hosting 商與部署網址 | M1-08 先建測試部署；M3-07 正式確認與 network 稽核 | 本機與測試部署並用；線上狀態以 [部署紀錄](test-deployment.md) 為準，不等於正式發布 |
 | NFR-03 可重現的效能門檻 | M1-08 實測 → M3-07 決策／複測 | 未定標時不能標 Release performance passed |
 | FR-13 P1 Go / Defer | M3-06；產品價值、試玩與成本 | Defer 明列不交付；**不**把 P1 變成 P0 blocker |
 
 ## 9. 下一個可直接執行的工作
 
-**Next：`M1-08 — Vertical Slice 整合、Safari 初測及效能基線` 仍因缺少真機與親子觀察而維持 Blocked。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線、M1-04 character art／scene slice、M1-05 共用倒數／中央揭曉／故障回退、M1-06 因果分鏡／靜態替代，以及 M1-07 結果／失利復原／再玩均有自動化證據。M1-08／M3-05 仍須補 iPhone／iPad Safari 真機操作證據；親子試玩與 M1 Exit gate 仍依原計畫。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
+**Next：`M1-08 — Vertical Slice 整合、Safari 初測及效能基線` 維持 Blocked。** M1-02 的實作與自動化 viewport 驗證已完成；M1-03 Computer 接線、M1-04 character art／scene slice、M1-05 共用倒數／中央揭曉／故障回退、M1-06 因果分鏡／靜態替代，以及 M1-07 結果／失利復原／再玩均有自動化證據。使用者已回報 iPad Air 第 5 代／iPadOS 17.6.1／Safari 的基本 Computer 直橫向流程、再玩、版面及定性反應通過；範圍與限制見 [真機紀錄表](m1-08-device-record.md)。iPhone Safari、未覆蓋的 iPad 檢查、量化效能基線及親子觀察仍未驗證；M1-08 未 Done，M1 Exit gate 關閉。M0-01～M0-07 已完成，M0-GATE 已通過，M0-08 不需要。M0-06 延用既有 reducer／controller 的回合／相位 token 與取消語義，未另造規則或持久化秘密選拳。
 
 **目前交付邊界**：M0 Learn／Together 是技術原型，M0-GATE 通過只決定工程選型並允許開始 M1；**正式 Learn／Together UI／美術／音訊、實機或幼兒試玩證據、部署與發布仍未完成**。後續執行時逐項更新任務狀態與真實證據，不要先勾選未驗證的完成條件。

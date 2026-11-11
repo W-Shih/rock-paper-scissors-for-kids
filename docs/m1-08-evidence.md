@@ -2,7 +2,11 @@
 
 **Status: Blocked.** Automated integration evidence is recorded below. No physical
 iPhone/iPad Safari, Android device, or parent/child play observation was available
-for this run. M1-08 is not Done, M1 Exit remains closed, and NFR-03 has no accepted
+for the original automated run. A subsequent user report confirms the basic iPad
+portrait/landscape Computer flow, replay, layout and qualitative responsiveness
+on iPad Air (5th generation), iPadOS 17.6.1, Safari (separate version not supplied).
+See the [physical-device record](m1-08-device-record.md)
+for the exact scope and evidence source. M1-08 is not Done, M1 Exit remains closed, and NFR-03 has no accepted
 performance threshold or final pass claim.
 
 ## Scope and requirements
@@ -63,9 +67,16 @@ dropped-frame/FPS measurement was taken.
 
 ## Remaining evidence
 
-- **Blocked:** iPhone Safari portrait and iPad Safari portrait/landscape touch,
-  safe-area, browser-toolbar and visual behavior; actual device/OS/Safari versions
-  and results must be recorded when run.
+HTTPS trial preparation (2026-11-10): see [deployment record](test-deployment.md)
+and the ready-to-fill [physical Safari record](m1-08-device-record.md).
+Deployment alone does not satisfy physical-device or family observations. The
+subsequent iPad user report is recorded separately from deployment and automation.
+
+- **Partial / Blocked:** the user reports passing basic iPad portrait/landscape
+  Computer flow, replay, layout and qualitative responsiveness on iPad Air
+  (5th generation), iPadOS 17.6.1, Safari. Explicit toolbar-state checks and quantitative device measurements
+  remain pending; iPhone Safari portrait is still unverified. See the linked
+  physical-device record for observations that were and were not reported.
 - **Blocked:** parent/child observation of gesture understanding, mistaken speed
   cues, accidental touches, response to a loss, replay, and off-screen gesture
   demonstration. Do not record child identity or personal data.
