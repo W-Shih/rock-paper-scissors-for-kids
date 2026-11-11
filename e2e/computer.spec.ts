@@ -125,3 +125,88 @@ test('rock-beats-scissors causal storyboard supports either winner position and 
   await page.screenshot({ path: screenshotPath('rock-image-failure-fallback'), fullPage: true });
   await expect(screen.getByRole('status')).toContainText('Round complete!');
 });
+
+test('Computer recovers from an animation failure, completes the static result and replays cleanly', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.clock.install();
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate;
+    let failedFirstAnimation = false;
+    Element.prototype.animate = function (...args) {
+      if (!failedFirstAnimation) {
+        failedFirstAnimation = true;
+        throw new Error('Simulated animation failure');
+      }
+      return animate.apply(this, args);
+    };
+  });
+  await page.addInitScript(() => { Math.random = () => 0.4; });
+  await page.goto('/');
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '電腦 / Computer' }).click();
+  const screen = page.getByRole('region', { name: '電腦對戰原型 / Computer play spike' });
+
+  await page.getByRole('button', { name: /^✊/ }).click();
+  await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
+  await page.clock.fastForward(1000);
+  await page.clock.fastForward(1000);
+  await page.clock.fastForward(500);
+  await page.clock.fastForward(500);
+  const result = screen.getByRole('figure', { name: '中央揭曉結果 / Central reveal' });
+  await expect(result).toContainText('Rock beats scissors!');
+
+  await expect(result.locator('.causal-storyboard--complete')).toBeVisible();
+  await expect(result).toContainText('Rock stops scissors.');
+  await expect(screen.getByRole('button', { name: '看完了 / Finished watching' })).toBeVisible();
+  await screen.getByRole('button', { name: '看完了 / Finished watching' }).click();
+  await expect(screen.getByRole('heading', { name: '完成一局！ / Round complete!' })).toBeVisible();
+
+  await screen.getByRole('button', { name: '再玩一次 / Play again' }).click();
+  await expect(screen.getByRole('figure')).toHaveCount(0);
+  await expect(screen.getByRole('button', { name: '確認 / Confirm', exact: true })).toBeDisabled();
+});
+
+test('Computer records a reproducible browser timing sample without asserting performance limits', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => { Math.random = () => 0.4; });
+  await page.goto('/');
+  await page.getByRole('button', { name: '比賽 / Play' }).waitFor({ state: 'visible' });
+  const firstPlayControlVisibleSinceNavigationMs = await page.evaluate(() => performance.now());
+  await page.getByRole('button', { name: '比賽 / Play' }).click();
+  await page.getByRole('button', { name: '電腦 / Computer' }).click();
+  const screen = page.getByRole('region', { name: '電腦對戰原型 / Computer play spike' });
+  const navigation = await page.evaluate(() => {
+    const entry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    return { domInteractiveMs: entry.domInteractive, loadEventEndMs: entry.loadEventEnd };
+  });
+  await page.evaluate(() => document.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('button[data-action^="select-"]')) {
+      performance.mark('m1-08-selection-click');
+    }
+  }, { capture: true, once: true }));
+  await page.getByRole('button', { name: /^✊/ }).click();
+  await expect(screen.locator('button[aria-pressed="true"]')).toHaveCount(1);
+  const selectionDomClickToSelectedMs = await page.evaluate(() => performance.now() - performance.getEntriesByName('m1-08-selection-click', 'mark')[0]!.startTime);
+  await page.evaluate(() => document.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('button[data-action="confirm"]')) {
+      performance.mark('m1-08-confirm-click');
+    }
+  }, { capture: true, once: true }));
+  await page.getByRole('button', { name: '確認 / Confirm', exact: true }).click();
+  await expect(screen.getByRole('status')).toContainText('Ready, Set, Go!');
+  const confirmationToCountdownVisibleMs = await page.evaluate(() => performance.now() - performance.getEntriesByName('m1-08-confirm-click', 'mark')[0]!.startTime);
+  await expect(screen.getByRole('heading', { name: '完成一局！ / Round complete!' })).toBeVisible({ timeout: 10_000 });
+  const confirmationToRoundCompleteMs = await page.evaluate(() => performance.now() - performance.getEntriesByName('m1-08-confirm-click', 'mark')[0]!.startTime);
+  const sample = {
+    task: 'M1-08 initial automated browser timing sample',
+    browser: testInfo.project.name,
+    viewportCssPx: '390x844',
+    navigation,
+    firstPlayControlVisibleSinceNavigationMs,
+    selectionDomClickToSelectedMs,
+    confirmDomClickToCountdownVisibleMs: confirmationToCountdownVisibleMs,
+    confirmDomClickToRoundCompleteVisibleMs: confirmationToRoundCompleteMs,
+    note: 'Single local-run observation; DOM confirmation click to visible states includes app timers/animation. Diagnostic only, not a performance threshold or physical-device result.',
+  };
+  console.log(`M1-08_TIMING ${JSON.stringify(sample)}`);
+});
